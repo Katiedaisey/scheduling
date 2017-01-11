@@ -56,7 +56,8 @@ def doUpdateClasses():
 	import update_classes_table as uct
 	uct.update_classes_table()
 	global matrix_sections
-	matrix_sections = matrices.matrix_sections()
+	doUpdateClassWorth()
+	#matrix_sections = matrices.matrix_sections()
 	message = "Classes Updated From file"
 	d.set(message)
 
@@ -111,10 +112,12 @@ def doUpdateClassWorth():
 		return(inputDialog.value)
 	
 	worths = onClick()
+	# update in database
 	count = 0
 	for cl in classes:
 		cur.execute('UPDATE Classes SET Worth = ? WHERE ShortName = ?', (float(worths[count]), cl[0]))
 		count = count + 1
+	
 	
 	conn.commit()
 	message = "Updated Class Worths!"
@@ -124,6 +127,7 @@ def doUpdateClassWorth():
 
 def doUpdateStudents():
 	import update_students_table as ust
+	import matrices
 	#import sys
 
 	
@@ -147,46 +151,11 @@ def doUpdateStudents():
 	
 	onClick()
 	ust.update_students_table()
+	matrices.matrix_pref()
 	message = "Student Responses Updated!"
 	d.set(message)
 
 
-def doClassWeights():
-	conn = sqlite3.connect('/Users/katiedaisey/Desktop/tascheduling/try1.db')
-	cur = conn.cursor()
-	
-	profs = cur.execute('SELECT ShortName FROM Classes')
-	profs = cur.fetchall()
-	
-	
-	class MyDialog:
-		
-		def __init__(self, parent):
-			top = self.top = Toplevel(parent)
-			self.myLabel = Label(top, text='List of Classes:')
-			self.myLabel.pack()
-			self.myframe = Frame(top)
-			self.myframe.pack(fill = BOTH)
-			T = Text(self.myframe)
-			T.pack()
-			def addtolist(item):
-				T.insert(END, str(item[0])[1:-1] + "\n")
-			for item in profs:
-				addtolist(item = item)	
-			self.mySubmitButton = Button(top, text='Finished', command=self.send)
-			self.mySubmitButton.pack()
-			
-			
-			
-		def send(self):
-			self.top.destroy()
-		
-	def onClick():
-	    inputDialog = MyDialog(root)
-	    root.wait_window(inputDialog.top)
-	    return()
-	
-	onClick()
 
 # List Classes in popup box for google forms survey
 def doListClasses():
@@ -319,7 +288,7 @@ def doByStudent():
 def doAutomateFast():
 	doSave(output2 = "output")
 	global mat_prefs
-	auto.gen_sec_matrix(pop = 10000, keep = 10, output = output)
+	auto.gen_sec_matrix(pop = 100, keep = 10, output = output)
 	auto.break_up(output)
 	global mat_sch
 	mat_sch = auto.gen_sec_stu_matrix(mat_prefs = mat_prefs, pop = 1000, keep = 1, mats = 10, output = output)[0]
@@ -374,15 +343,24 @@ def doViewClass():
 	for ta in tas:
 		lines[ta[2]] = ta[1]
 	doCalendar(calendarFrame)
+	info = []
 	for cl in classes:
 		name = "0"
 		if cl[1] == 1:
 			name = lines[cl[0]]
 		if len(cl[3]) > 1:
 			for c in cl[3]:
-				block_in_Calendar(text = cl[2] + " (" + name + ")", open = cl[1], day =  c, start = cl[4], end = cl[5], calendarFrame = calendarFrame)
+				try:
+					block_in_Calendar(text = cl[2] + " (" + name + ")", open = cl[1], day =  c, start = cl[4], end = cl[5], calendarFrame = calendarFrame)
+				except:
+					info.append(cl[2] + ": " + name + " " + cl[4] + "-" + cl[5])
 		else:
-			block_in_Calendar(text = cl[2] + " (" + name + ")", open =  cl[1], day =  cl[3], start = cl[4], end = cl[5], calendarFrame = calendarFrame)
+			try:
+				block_in_Calendar(text = cl[2] + " (" + name + ")", open =  cl[1], day =  cl[3], start = cl[4], end = cl[5], calendarFrame = calendarFrame)
+			except:
+				continue
+				#info.append(cl[2] + ": " + name + " " + cl[4] + "-" + cl[5])
+	add_info_Calendar(text = info, calendarFrame = calendarFrame)
 	return()
 
 def doViewStudent(student):
@@ -404,6 +382,9 @@ def doViewStudent(student):
 	prefer = cur.fetchall()
 	for pt in prefer:
 		block_in_Calendar(text = '', open = 2, day = pt[0], start = pt[1], end = pt[2], calendarFrame = calendarFrame)
+	cur.execute('SELECT Year, Division, Skill FROM Students WHERE StudentID = ?', (student,))
+	info = cur.fetchone()
+	add_info_Calendar(text = "Year: " + str(info[0]) + ", Div: " + str(info[1]) + ', Skill: ' + str(info[2]), calendarFrame = calendarFrame)
 	
 	
 	
@@ -421,12 +402,19 @@ def doViewStudent(student):
 			ON E.TimeID = D.TimeID
 			WHERE A.StudentID = ?''', (student,))
 		sch_classes = cur.fetchall()
+		print sch_classes
 		for cl in sch_classes:
 			if len(cl[3]) > 1:
 				for c in cl[3]:
-					block_in_Calendar(text = cl[1] + " " + cl[2], open = 1, day = c, start = cl[4], end = cl[5], calendarFrame = calendarFrame)
+					try:
+						block_in_Calendar(text = cl[1] + " " + cl[2], open = 1, day = c, start = cl[4], end = cl[5], calendarFrame = calendarFrame)
+					except:
+						continue
 			else:
-				block_in_Calendar(text = cl[1] + " " + cl[2], open = 1, day = cl[3], start = cl[4], end = cl[5], calendarFrame = calendarFrame)
+				try:
+					block_in_Calendar(text = cl[1] + " " + cl[2], open = 1, day = cl[3], start = cl[4], end = cl[5], calendarFrame = calendarFrame)
+				except:
+					continue
 			
 		
 
@@ -1047,9 +1035,9 @@ def doOpenSchedule(output2 = None):
 	
 	global mat_yes
 	mat_yes = np.load(output + "/mat_yes.npy")
-	global mat_no
-	mat_no = np.load(output + "/mat_no.npy")
-	global matrix_section
+	#global mat_no
+	#mat_no = np.load(output + "/mat_no.npy")
+	global matrix_sections
 	matrix_sections = np.load(output + "/matrix_sections.npy")
 	global mat_prefs
 	mat_prefs = np.load(output + "/mat_prefs.npy") # matrices.matrix_pref()
@@ -1065,7 +1053,7 @@ def doOpenSchedule(output2 = None):
 
 def doSave(output2):
 	np.save(output2 + "/mat_yes.npy",mat_yes)
-	#np.save(output + "/mat_no.npy", mat_no)
+	np.save(output + "/mat_no.npy", mat_no)
 	np.save(output2 + "/matrix_sections.npy", matrix_sections)
 	np.save(output2 + "/mat_prefs.npy", mat_prefs)
 	message = "Saved"
@@ -1111,9 +1099,9 @@ def file_save():
 	make_sure_path_exists(output)
 	#np.save(output + "/automats", automats)
 	np.save(output + "/mat_yes",mat_yes)
-	#np.save(output + "/mat_no", mat_no)
+	np.save(output + "/mat_no", mat_no)
 	np.save(output + "/mat_prefs.npy", mat_prefs)
-	np.save(output + "/matrix_sections", matrix_sections)
+	np.save(output + "/matrix_sections.npy", matrix_sections)
 	message = "Saved"
 	d.set(message)
 

@@ -1,7 +1,7 @@
 # create section_section matrix
 
 
-
+# run with downloadClasses and updateClasses
 def matrix_sections():
 	import sqlite3
 	import numpy as np
@@ -67,6 +67,7 @@ def matrix_sections():
  
 
 # Stu_Sec preferences
+# run with #UpdateStudent
 def matrix_pref():
 	import sqlite3
 	import numpy as np
@@ -146,6 +147,38 @@ def matrix_pref():
 			conflict4 = conflict4 * 1
 			
 			# student section YDS prefs
+			cur.execute('''SELECT Count(*)
+							FROM Students A INNER JOIN Year B
+							ON A.Year = B.Name
+							INNER JOIN Sections_Year C
+							ON B.PrimaryKey = C.YearID
+							WHERE A.StudentID = ? AND C.SectionID = ?
+							''',(students[i][0],sections[j][0]))
+			prefyr = cur.fetchone()[0]
+			prefyr = prefyr * 1000
+			
+			
+			cur.execute('''SELECT Count(*)
+							FROM Students A INNER JOIN Division B
+							ON A.Division = B.Name
+							INNER JOIN Sections_Division C
+							ON B.PrimaryKey = C.DivisionID
+							WHERE A.StudentID = ? AND C.SectionID = ?
+							''',(students[i][0],sections[j][0]))
+			prefdiv = cur.fetchone()[0]
+			prefdiv = prefdiv * 5000
+			
+			
+			cur.execute('''SELECT Count(*)
+							FROM Students A INNER JOIN Year B
+							ON A.Skill = B.Name
+							INNER JOIN Sections_Skill C
+							ON B.PrimaryKey = C.SkillID
+							WHERE A.StudentID = ? AND C.SectionID = ?
+							''',(students[i][0],sections[j][0]))
+			prefsk = cur.fetchone()[0]
+			prefsk = prefsk * 1000
+			
 			
 			# student section time prefs (equal to survey)
 			cur.execute('''SELECT COUNT(*)
@@ -201,8 +234,9 @@ def matrix_pref():
 				pref4 = 500
 			pref4 = pref4 * 1
 			
-			
-			mat_prefs[i,j] = conflict1 + conflict2 + conflict3 + conflict4 + pref1 + pref2 + pref3 + pref4
+			#print students[i][0], sections[j][0]
+			#print conflict1, conflict2, conflict3, conflict4, pref1, pref2, pref3, pref4, prefyr, prefdiv, prefsk
+			mat_prefs[i,j] = conflict1 + conflict2 + conflict3 + conflict4 + pref1 + pref2 + pref3 + pref4 + prefyr + prefdiv + prefsk
 			
 	np.savetxt("student_preferences.csv", mat_prefs, delimiter=",")
 	return(mat_prefs)

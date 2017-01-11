@@ -112,8 +112,8 @@ def gen_sec_matrix(pop, keep, output):
 	
 	
 	
-	value = [0] * keep
-	keepmat = [[0]] * keep
+	value = [None] * keep
+	keepmat = [[None]] * keep
 	count = 0
 	for p in range(pop):
 		mat_pos = np.copy(mat_base)
@@ -232,7 +232,7 @@ def gen_sec_matrix(pop, keep, output):
 		newmat = mat_pos * sec_prefs # element wise multiplication
 		newvalue = sum(sum(newmat))
 		
-		if newvalue > value[count]:
+		if newvalue > value[count] or value[count] is None:
 			value[count] = newvalue
 			keepmat[count] = mat_pos
 			# keep 100 best matrices
@@ -245,7 +245,7 @@ def gen_sec_matrix(pop, keep, output):
 	return(keepmat)
 
 
-#m = gen_sec_matrix(1000,100, "output")
+#m = gen_sec_matrix(1000,100, "test1")
 
 
 
@@ -290,6 +290,7 @@ def gen_sec_stu_matrix(mat_prefs, pop, keep, mats, output):
 	keepmat = [[None]] * keep
 	count = 0
 	for m in range(mats):
+		mat_base = np.copy(mat_yes)
 		mat_sch = np.load(output + "/matrices/mat_" + str(m) + ".npy")
 		# get students already scheduled
 		count2 = 0
@@ -298,14 +299,29 @@ def gen_sec_stu_matrix(mat_prefs, pop, keep, mats, output):
 		for s in stu_worth:
 			# for rounding issues
 			if s[0] > 0: #scheduled at all - already has line
+				# count2 is student
+				# need to get sections student has
 				base_stu.remove(count2)
-				mat_base[count2,:] = mat_sch[count2,:]
-				cl = [i for i, x in enumerate(mat_sch[count2,:]) if x==1]
+				#mat_base[count2,:] = mat_sch[count2,:]
+				cl = [i for i, x in enumerate(mat_base[count2,:]) if x==1]
+				# get line containing classes student is scheduled for
+				# replace student schedule with line with additional classes
+				print count2
+				print mat_base[count2,:]
+				print cl
+				print cl[0]
+				print mat_sch.shape
+				mat_base[count2,:] = mat_sch[cl[0],:]
+				# remove sections from list to be scheduled
 				for c in cl:
 					base_sec.remove(c)
 			count2 = count2 + 1
+		
 		for p in range(pop):
+			# get copy of matrix with already scheduled tas
 			mat_sch1 = np.copy(mat_base)
+			
+			# make fresh copies of students and sections not hand scheduled
 			left_stu = base_stu[:]
 			left_sec = base_sec[:]
 			while len(left_stu) > 0 and len(left_sec) > 0:
@@ -345,7 +361,8 @@ def gen_sec_stu_matrix(mat_prefs, pop, keep, mats, output):
 
 #import numpy as np
 #prefs = np.load("test1/mat_prefs.npy")
-#m = gen_sec_stu_matrix(prefs, 100, 1, 1, "test1")
+#gen_sec_stu_matrix(mat_prefs, pop, keep, mats, output)
+#m = gen_sec_stu_matrix(prefs, 100, 1, 10, "test1")
 
 def break_up(output):
 	matrices = np.load(output + "/best_sec_sec.npy")
@@ -362,6 +379,23 @@ def break_up(output):
 		count = count + 1
 
 #break_up("test1")
+
+def break_up2(output):
+	matrices = np.load(output + "/best_stu_sec.npy")
+	
+	d = os.path.dirname(output + "/matrices2/")
+	
+
+	if not os.path.exists(d):
+		os.makedirs(d)
+		
+	count = 0
+	for matrix in matrices:
+		np.save(output + "/matrices2/mat_" + str(count) + ".npy", matrix)
+		count = count + 1
+
+#break_up2("test1")
+
 def updateDatabase(schedule, output, mat_pref):
 	conn = sqlite3.connect('/Users/katiedaisey/Desktop/tascheduling/try1.db')
 	cur = conn.cursor()
@@ -370,7 +404,7 @@ def updateDatabase(schedule, output, mat_pref):
 	for sch in range(schedule.shape[1]):
 		stu = [i for i, x in enumerate(schedule[:,sch]) if x==1]
 		if len(stu) > 0:
-			secworth = get_section_worth(sch + 1)[0]
+			secworth = get_section_worth(sch)[0]
 			cur.execute('UPDATE Sections SET Scheduled = ? WHERE SectionID = ?', (1, sch + 1))
 			cur.execute('UPDATE Sections Set StudentID = ? WHERE SectionID = ?', (stu[0] + 1, sch + 1))
 			

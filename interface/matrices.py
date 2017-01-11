@@ -21,26 +21,46 @@ def matrix_sections():
 	#	for j in range(len(sections)):
 	for i in range(len(sections)):
 		for j in range(len(sections)):
+			conflicts = 0
+			pref = 0
+			pref2 = 0
+			
+			
 			a = sections[i][0]
 			b = sections[j][0]
 			# time conflicts
-			conflict = cur.execute('''SELECT COUNT(*) FROM Con_Section_Section WHERE SectionID1 = ? AND SectionID2 = ?''', (a, b) )
-			conflicts = cur.fetchall()
-			conflicts = conflicts[0][0]
-			if int(conflicts) > 0:
-				conflicts = -10000
-			conflicts = conflicts
+			conflictsa = cur.execute('''SELECT COUNT(*) FROM Con_Section_Section WHERE SectionID1 = ? AND SectionID2 = ?''', (a, b) )
+			conflictsa = cur.fetchall()
+			conflictsa = conflictsa[0][0]
+			conflictsb = cur.execute('''SELECT COUNT(*) FROM Con_Section_Section WHERE SectionID1 = ? AND SectionID2 = ?''', (b,a) )
+			conflictsb = cur.fetchall()
+			conflictsb = conflictsb[0][0]
 			
-			#
-			pref = cur.execute('''SELECT COUNT(*) FROM Pref_Section_Section WHERE SectionID1 = ? AND SectionID2 = ?''', (sections[i][0], sections[j][0]) )
-			pref = cur.fetchall()[0][0]
-			pref = pref * 1000
+			if int(conflictsa) > 0 or int(conflictsb) > 0:
+				conflicts = max(int(conflictsa),int(conflictsb))
+			conflicts = conflicts * -10000000
 			
-			pref2 = cur.execute('''SELECT COUNT(*) FROM Pref2_Section_Section WHERE SectionID1 = ? AND SectionID2 = ?''', (sections[i][0], sections[j][0]) )
-			pref2 = cur.fetchall()[0][0]
-			pref2 = pref2 * 1000
+			# 
+			prefa = cur.execute('''SELECT COUNT(*) FROM Pref_Section_Section WHERE SectionID1 = ? AND SectionID2 = ?''', (a, b) )
+			prefa = cur.fetchall()[0][0]
+			prefb = cur.execute('''SELECT COUNT(*) FROM Pref_Section_Section WHERE SectionID1 = ? AND SectionID2 = ?''', (b,a) )
+			prefb = cur.fetchall()[0][0]
+			if prefa > 0 or prefb > 0:
+				pref = max(prefa, prefb)
+			pref = pref * 2000
+			
+			pref2a = cur.execute('''SELECT COUNT(*) FROM Pref2_Section_Section WHERE SectionID1 = ? AND SectionID2 = ?''', (a, b) )
+			pref2a = cur.fetchall()[0][0]
+			pref2a = pref2a * 1000
+			pref2b = cur.execute('''SELECT COUNT(*) FROM Pref2_Section_Section WHERE SectionID1 = ? AND SectionID2 = ?''', (b,a) )
+			pref2b = cur.fetchall()[0][0]
+			pref2b = pref2b * 1000
+			if pref2a > 0 or pref2b > 0:
+				pref2 = max(pref2a, pref2b)
+			pref2 = pref2 * 2000
 					
 			mat_sections[i,j] = conflicts + pref + pref2
+	
 	#Writing CSV file
 	np.savetxt("section_section_matrix.csv", mat_sections, delimiter=",")
 	return(mat_sections)
@@ -63,6 +83,15 @@ def matrix_pref():
 	for i in range(len(students)):
 		
 		for j in range(len(sections)):
+			# init values
+			conflict1 = 0
+			conflict2 = 0
+			conflict3 = 0
+			conflict4 = 0
+			pref1 = 0
+			pref2 = 0
+			pref3 = 0
+			pref4 = 0
 			
 			# Student section time conflicts (equal to survey)
 			conflict1 = cur.execute('''SELECT COUNT(*)
@@ -74,19 +103,27 @@ def matrix_pref():
 			conflict1 = cur.fetchone()[0]
 			if int(conflict1) > 0:
 				conflict1 = -5000
-			conflict1 = conflict1
+			conflict1 = conflict1 * 1
+				
 			
 			# student section time conflicts (overlaps survey)
-			conflict2 = cur.execute('''SELECT COUNT(*)
+			cur.execute('''SELECT COUNT(*)
 							FROM Con_Student_Time A INNER JOIN Con_Time_Time B
 							On A.TimeID = B.TimeID1
 							INNER JOIN Sections_Times C
 							ON B.TimeID2 = C.TimeID
 							WHERE A.StudentID = ? and C.SectionID = ?''', (students[i][0],sections[j][0]))
-			conflict2 = cur.fetchone()[0]
-			if int(conflict2) > 0:
+			conflict2a = cur.fetchone()[0]
+			cur.execute('''SELECT COUNT(*)
+							FROM Con_Student_Time A INNER JOIN Con_Time_Time B
+							On A.TimeID = B.TimeID1
+							INNER JOIN Sections_Times C
+							ON B.TimeID2 = C.TimeID
+							WHERE A.StudentID = ? and C.SectionID = ?''', (students[i][0],sections[j][0]))
+			conflict2b = cur.fetchone()[0]
+			if conflict2a > 0 or conflict2b > 0:
 				conflict2 = -5000
-			conflict2 = conflict2
+			conflict2 = conflict2 * 1
 			
 			# Student class conflict desire
 			conflict3 = cur.execute('''SELECT COUNT(*)
@@ -96,22 +133,22 @@ def matrix_pref():
 			conflict3 = cur.fetchone()[0]
 			if int(conflict3) > 0:
 				conflict3 = -500
-			conflict3 = conflict3
+			conflict3 = conflict3 * 1
 			
 			# student professor conflict desire
-			conflict4 = cur.execute('''SELECT COUNT(*)
+			cur.execute('''SELECT COUNT(*)
 							FROM Con_Student_Prof A INNER JOIN Sections B
 							On A.ProfessorID = B.ProfessorID
 							WHERE A.StudentID = ? and B.SectionID = ?''', (students[i][0],sections[j][0]))
 			conflict4 = cur.fetchone()[0]
 			if int(conflict4) > 0:
 				conflict4 = -500
-			conflict4 = conflict4
+			conflict4 = conflict4 * 1
 			
 			# student section YDS prefs
 			
 			# student section time prefs (equal to survey)
-			pref1 = cur.execute('''SELECT COUNT(*)
+			cur.execute('''SELECT COUNT(*)
 							FROM Students A INNER JOIN Pref_Student_Time B
 							ON A.StudentID = B.StudentID
 							INNER JOIN Sections_Times C
@@ -120,17 +157,27 @@ def matrix_pref():
 			pref1 = cur.fetchone()[0]
 			if int(pref1) > 0:
 				pref1 = 500
+			pref1 = pref1 * 1
 			
 			# student section time prefs (overlaps survey)
-			pref = cur.execute('''SELECT COUNT(*)
-							FROM Con_Student_Time A INNER JOIN Con_Time_Time B
+			cur.execute('''SELECT COUNT(*)
+							FROM Pref_Student_Time A INNER JOIN Con_Time_Time B
 							On A.TimeID = B.TimeID1
 							INNER JOIN Sections_Times C
 							ON B.TimeID2 = C.TimeID
 							WHERE A.StudentID = ? and C.SectionID = ?''', (students[i][0],sections[j][0]))
-			pref2 = cur.fetchone()[0]
-			if int(pref2) > 0:
-				pref2 = 500
+			pref2a = cur.fetchone()[0]
+			cur.execute('''SELECT COUNT(*)
+							FROM Pref_Student_Time A INNER JOIN Con_Time_Time B
+							On A.TimeID = B.TimeID2
+							INNER JOIN Sections_Times C
+							ON B.TimeID1 = C.TimeID
+							WHERE A.StudentID = ? and C.SectionID = ?''', (students[i][0],sections[j][0]))
+			pref2b = cur.fetchone()[0]
+			if int(pref2a) > 0 or pref2b > 0:
+				pref2 = max(pref2a, pref2b)
+			pref2 = pref2 * 500
+			
 			
 			
 			
@@ -142,7 +189,7 @@ def matrix_pref():
 			pref3 = cur.fetchone()[0]
 			if int(pref3) > 0:
 				pref3 = 500
-			pref3 = pref3
+			pref3 = pref3 * 1
 			
 			
 			pref4 = cur.execute('''SELECT COUNT(*)
@@ -152,13 +199,14 @@ def matrix_pref():
 			pref4 = cur.fetchone()[0]
 			if int(pref4) > 0:
 				pref4 = 500
-			pref4 = pref4
+			pref4 = pref4 * 1
 			
 			
 			mat_prefs[i,j] = conflict1 + conflict2 + conflict3 + conflict4 + pref1 + pref2 + pref3 + pref4
 			
 	np.savetxt("student_preferences.csv", mat_prefs, delimiter=",")
 	return(mat_prefs)
+
 
 
 def section_index():

@@ -95,8 +95,12 @@ def block_in_Calendar(text, open, day, start, end, calendarFrame):
 	
 	if open == 1: #scheduled
 		bg = "green"
-	else:
+	elif open == 0: #not scheduled
 		bg = "red"
+	elif open == 2: #student available
+		bg = "pale green"
+	elif open == 3: #student not available
+		bg = "salmon"
 	
 	label = Label(calendarFrame, bg = bg, text = text, )
 	label.grid(row = row1, column = col, rowspan = span, sticky='nsew')

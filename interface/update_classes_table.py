@@ -174,12 +174,14 @@ def update_classes_table():
 			
 			# create and get SectionID
 			sectionnum = classother[7:10]
-			
-			
-			cur.execute('''INSERT OR IGNORE INTO Sections 
-			(Name, ProfessorID, ClassID) VALUES (?, ?, ?)''', (sectionnum,	ProfessorID, ClassID) )
-			cur.execute('SELECT SectionID FROM Sections WHERE Name = ? and ClassID = ?', (sectionnum, ClassID))
-			SectionID = cur.fetchone()[0]
+			try:
+				cur.execute('SELECT SectionID FROM Sections WHERE Name = ? and ClassID = ?', (sectionnum, ClassID))
+				SectionID = cur.fetchone()[0]
+			except:
+				cur.execute('''INSERT OR IGNORE INTO Sections 
+			(Name, ProfessorID, ClassID) VALUES (?, ?, ?)''', (sectionnum, ProfessorID, ClassID) )
+				cur.execute('SELECT SectionID FROM Sections WHERE Name = ? and ClassID = ?', (sectionnum, ClassID))
+				SectionID = cur.fetchone()[0]
 			
 			
 			# get YDS
@@ -285,14 +287,19 @@ def update_classes_table():
 			otherids = id[:i] + id[i+1:]
 			nowstart = start[i]
 			nowend   = end[i]
+			cur.execute('''INSERT OR IGNORE INTO Con_Time_Time (TimeID1, TimeID2) VALUES (?,?)''',(id[i],id[i]))
 			
 			for j in range(len(otherstarts)):
 				if nowstart > otherstarts[j] and nowstart < otherends[j]:
 					cur.execute('''INSERT OR IGNORE INTO Con_Time_Time (TimeID1,
 					 TimeID2) VALUES (?, ?)''', (id[i], otherids[j]) )
+					cur.execute('''INSERT OR IGNORE INTO Con_Time_Time (TimeID1,
+					 TimeID2) VALUES (?, ?)''', (otherids[j], id[i]) )
 				elif nowend > otherstarts[j] and nowend < otherends[j]:
 					cur.execute('''INSERT OR IGNORE INTO Con_Time_Time (TimeID1,
-				 TimeID2) VALUES (?, ?)''', (id[i], otherids[j]) )
+					TimeID2) VALUES (?, ?)''', (id[i], otherids[j]) )
+					cur.execute('''INSERT OR IGNORE INTO Con_Time_Time (TimeID1,
+					TimeID2) VALUES (?, ?)''', (otherids[j], id[i]) )
 			conn.commit()
 	
 	

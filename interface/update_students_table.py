@@ -275,9 +275,13 @@ def update_students_table():
 				if nowstart > otherstarts[j] and nowstart < otherends[j]:
 					cur.execute('''INSERT OR IGNORE INTO Con_Time_Time (TimeID1,
 					 TimeID2) VALUES (?, ?)''', (id[i], otherids[j]) )
+					cur.execute('''INSERT OR IGNORE INTO Con_Time_Time (TimeID1,
+					 TimeID2) VALUES (?, ?)''', (otherids[j], id[i]) )
 				elif nowend > otherstarts[j] and nowend < otherends[j]:
 					cur.execute('''INSERT OR IGNORE INTO Con_Time_Time (TimeID1,
 					 TimeID2) VALUES (?, ?)''', (id[i], otherids[j]) )
+					cur.execute('''INSERT OR IGNORE INTO Con_Time_Time (TimeID1,
+					 TimeID2) VALUES (?, ?)''', (otherids[j], id[i]) )
 			conn.commit()
 	
 	

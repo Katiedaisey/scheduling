@@ -317,7 +317,7 @@ def doByStudent():
 		leftListbox.insert(END, item)
 
 def doAutomateFast():
-	#doSaveSchedule()
+	doSave(output2 = "output")
 	global mat_prefs
 	auto.gen_sec_matrix(pop = 10000, keep = 10, output = output)
 	auto.break_up(output)
@@ -332,6 +332,7 @@ def doAutomateFast():
 	return()
 
 def doAutomateBest():
+	doSave(output2 = "output")
 	auto.gen_sec_matrix(pop = 10000, keep = 100, output = output)
 	auto.break_up(output)
 	global mat_sch
@@ -388,14 +389,13 @@ def doViewStudent(student):
 	conn = sqlite3.connect('/Users/katiedaisey/Desktop/tascheduling/try1.db')
 	cur = conn.cursor()
 	# immediate time conflicts
-	print student
 	unavail = cur.execute('''SELECT D.Day, D.Start, D.End
 		FROM Con_Student_Time B INNER JOIN Times D
 		ON B.TimeID = D.TimeID
 		WHERE B.StudentID = ?''', (student, ))
 	unavail = cur.fetchall()
 	for ut in unavail:
-		block_in_Calendar(text = '', open = 0, day = ut[0], start = ut[1], end = ut[2], calendarFrame = calendarFrame)
+		block_in_Calendar(text = '', open = 3, day = ut[0], start = ut[1], end = ut[2], calendarFrame = calendarFrame)
 	
 	prefer = cur.execute('''SELECT D.Day, D.Start, D.End
 		FROM Pref_Student_Time B INNER JOIN Times D
@@ -403,7 +403,7 @@ def doViewStudent(student):
 		WHERE B.StudentID = ?''', (student, ))
 	prefer = cur.fetchall()
 	for pt in prefer:
-		block_in_Calendar(text = '', open = 1, day = pt[0], start = pt[1], end = pt[2], calendarFrame = calendarFrame)
+		block_in_Calendar(text = '', open = 2, day = pt[0], start = pt[1], end = pt[2], calendarFrame = calendarFrame)
 	
 	
 	
@@ -421,12 +421,9 @@ def doViewStudent(student):
 			ON E.TimeID = D.TimeID
 			WHERE A.StudentID = ?''', (student,))
 		sch_classes = cur.fetchall()
-		print sch_classes
 		for cl in sch_classes:
 			if len(cl[3]) > 1:
-				print cl[3]
 				for c in cl[3]:
-					print c
 					block_in_Calendar(text = cl[1] + " " + cl[2], open = 1, day = c, start = cl[4], end = cl[5], calendarFrame = calendarFrame)
 			else:
 				block_in_Calendar(text = cl[1] + " " + cl[2], open = 1, day = cl[3], start = cl[4], end = cl[5], calendarFrame = calendarFrame)
@@ -682,6 +679,24 @@ def openaddselect(): #Schedule
 			c = cur.execute('UPDATE Students SET Scheduled = ? WHERE StudentID = ?',(float(value) + float(oldvalue), stu) )
 			c = cur.execute('UPDATE Sections SET Scheduled = ? WHERE SectionID = ?' , (1, sec))
 			c = cur.execute('UPDATE Sections SET StudentID = ? WHERE SectionID = ?', (stu, sec)) # wonder why this doesn't work with an AND statement
+			
+			
+			# Insert assigned sections in middle box
+			#chosenListbox.insert(END, "any")
+			cur.execute('''SELECT B.SectionID, C.ShortName, B.Name
+			FROM Students A INNER JOIN Sections B
+			ON A.StudentID = B.StudentID
+			INNER JOIN Classes C
+			ON B.ClassID = C.ClassID
+			WHERE A.StudentID = ?''', (stu,))
+			classes = cur.fetchall()
+			
+			
+			chosenListbox.delete(0, END)
+			for item in classes:
+				item = item[1] + " " + item[2]
+				chosenListbox.insert(END, item)
+			
 			conn.commit()
 		
 		
@@ -694,6 +709,8 @@ def openaddselect(): #Schedule
 			c = cur.execute('UPDATE Students SET Scheduled = ? WHERE StudentID = ?',(float(oldvalue) + float(value),  stu) )
 			conn.commit()
 				
+		
+		
 		
 		
 		doViewStudent(stu)
@@ -722,6 +739,9 @@ def openremoveselect(): #Remove
 			c = cur.execute('UPDATE Students SET Scheduled = ? WHERE StudentID = ?',(oldvalue - value, stu) )
 			c = cur.execute('Update Sections SET Scheduled = ? WHERE SectionID = ?' , (0, sec))
 			c = cur.execute('Update Sections SET StudentID = ? WHERE SectionID = ?' , (stu, sec))
+			
+			
+			
 			conn.commit()
 		
 		
@@ -751,7 +771,7 @@ def openremoveselect(): #Remove
 	
 	
 	if scheduling == 'student':
-		current = chosenListbox.get(ANCHOR)
+		current = openListbox.get(ANCHOR)
 		global current_section
 		conn = sqlite3.connect('/Users/katiedaisey/Desktop/tascheduling/try1.db')
 		cur = conn.cursor()
@@ -760,13 +780,80 @@ def openremoveselect(): #Remove
 		else:
 			current_section = current[1]
 			
-			
 			cla = cur.execute('SELECT ClassID FROM Classes WHERE ShortName = ?',(current_class,))
 			cla = cur.fetchone()[0]
 			sec1 = cur.execute('SELECT SectionID FROM Sections WHERE ClassID = ? and Name = ?', (cla, current_section))
 			global sec
 			sec = cur.fetchone()[0]
+		
+		stu = current_student.split(":")[0]
+		stu = int(stu)
+		
+		if current_section != "any":
+			global mat_yes
+			global mat_no
+			stuID = student_index[stu]
+			secID = section_index[sec] # what's sec from
+			mat_yes[stuID, secID] = 1
+			mat_no[stuID, secID] = 0
+			addPrefForClass(stu)
+			value = get_class_value(sec)
+			oldvalue = cur.execute('SELECT Scheduled FROM Students WHERE StudentID = ?',(stu, ) )
+			oldvalue = cur.fetchone()[0]
+			c = cur.execute('UPDATE Students SET Scheduled = ? WHERE StudentID = ?',(float(value) - float(oldvalue), stu) )
+			c = cur.execute('UPDATE Sections SET Scheduled = ? WHERE SectionID = ?' , (0, sec))
+			c = cur.execute('UPDATE Sections SET StudentID = ? WHERE SectionID = ?', (0, sec)) # wonder why this doesn't work with an AND statement
+			
+			
+			# Insert assigned sections in middle box
+			#chosenListbox.insert(END, "any")
+			cur.execute('''SELECT B.SectionID, C.ShortName, B.Name
+			FROM Students A INNER JOIN Sections B
+			ON A.StudentID = B.StudentID
+			INNER JOIN Classes C
+			ON B.ClassID = C.ClassID
+			WHERE A.StudentID = ?''', (stu,))
+			classes = cur.fetchall()
+			
+			
+			chosenListbox.delete(0, END)
+			for item in classes:
+				item = item[1] + " " + item[2]
+				chosenListbox.insert(END, item)
+			
+			conn.commit()
+		
+		
+		if current_section == "any":
+			removePrefForClass(stu)
+			
+			value = get_class_value(sec)
+			oldvalue = cur.execute('SELECT Scheduled FROM Students WHERE StudentID = ?',(stu, ) )
+			oldvalue = cur.fetchone()[0]
+			c = cur.execute('UPDATE Students SET Scheduled = ? WHERE StudentID = ?',(float(oldvalue) - float(value),  stu) )
+			conn.commit()
+		
+		
+		
+		
+		
+		# Insert assigned sections in middle box
+		#chosenListbox.insert(END, "any")
+		cur.execute('''SELECT B.SectionID, C.ShortName, B.Name
+			FROM Students A INNER JOIN Sections B
+			ON A.StudentID = B.StudentID
+			INNER JOIN Classes C
+			ON B.ClassID = C.ClassID
+			WHERE A.StudentID = ?''', (stu,))
+		classes = cur.fetchall()
+		
 		doViewStudent(stu)
+		
+		chosenListbox.delete(0, END)
+		for item in classes:
+			item = item[1] + " " + item[2]
+			chosenListbox.insert(END, item)
+		
 		message = "Student Removed from Class!"
 		d.set(message)
 
@@ -849,10 +936,7 @@ def addPrefForClass(student):
 	secs = cur.fetchall()
 	stuID = student_index[student]
 	for s in secs:
-		print s
 		secID = section_index[s[0]]
-		print secID
-		print stuID
 		cpref = mat_prefs[stuID,secID]
 		mat_prefs[stuID,secID] = int(cpref) + 1000
 
@@ -887,7 +971,6 @@ def doNewSchedule():
 	mat_no = matrices.matrix_schedule_manual()
 	global matrix_sections
 	try:
-		print "working"
 		#matrix_sections = matrices.matrix_sections()
 		matrix_sections = np.genfromtxt('section_section_matrix.csv', delimiter=',')
 	except:

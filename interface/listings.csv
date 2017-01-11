@@ -4,7 +4,6 @@ CHEM101022LLAB,General Chemistry,123,any,any,R,3:30PM - 6:30PM,"Chatellier,Dana 
 CHEM101023LLAB,General Chemistry,123,any,any,W,12:20PM - 3:20PM,"Chatellier,Dana Stewart"
 CHEM101024LLAB,General Chemistry,123,any,any,F,12:20PM - 3:20PM,"Chatellier,Dana Stewart"
 CHEM101025LLAB,General Chemistry,123,any,any,F,3:35PM - 6:35PM,"Chatellier,Dana Stewart"
-CHEM101510LLABWL,General Chemistry,123,any,any,TR,8:30PM - 10:00PM,"Pascucci,Pete"
 CHEM102020LLAB,General Chemistry,123,any,any,T,12:30PM - 3:30PM,"Chatellier,Dana Stewart"
 CHEM102021LLAB,General Chemistry,123,any,any,M,3:35PM - 6:35PM,"Chatellier,Dana Stewart"
 CHEM102022LLAB,General Chemistry,123,any,any,R,12:30PM - 3:30PM,"Chatellier,Dana Stewart"
@@ -139,11 +138,8 @@ CHEM334011LLAB,Organic Chemistry Majors Laboratory II,any,O,any,MT,7:00PM - 10:0
 CHEM334012LLAB,Organic Chemistry Majors Laboratory II,any,O,any,MT,3:45PM - 6:45PM,"Sametz,Geoffrey Michael"
 CHEM334013LLAB,Organic Chemistry Majors Laboratory II,any,O,any,WR,12:30PM - 3:30PM,"Sametz,Geoffrey Michael"
 CHEM334014LLAB,Organic Chemistry Majors Laboratory II,any,O,any,WF,3:30PM - 6:30PM,"Sametz,Geoffrey Michael"
-CHEM334015LLAB,Organic Chemistry Majors Laboratory II,any,O,any,W																				F,"7:00PM - 10:00PM
-
-		12:30PM -
-		3:30PM","Sametz,Geoffrey Michael
-		Sametz,Geoffrey Michael"
+CHEM334015LLAB,Organic Chemistry Majors Laboratory II,any,O,any,W																				F,7:00PM - 10:00PM,"Sametz,Geoffrey Michael"
+CHEM334015LLAB,Organic Chemistry Majors Laboratory II,any,O,any,W																				F,12:30PM - 3:30PM,"Sametz,Geoffrey Michael"
 CHEM334016LLAB,Organic Chemistry Majors Laboratory II,any,O,any,RF,7:00PM - 10:00PM,"Sametz,Geoffrey Michael"
 CHEM334080LLAB,Organic Chemistry Majors Laboratory II,any,O,any,TBA, ,Staff
 CHEM438020LLAB,Instrumental Methods Laboratory,any,A,any,M,12:30PM - 4:30PM,"Booksh,Karl S."

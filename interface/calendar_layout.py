@@ -1,5 +1,5 @@
 def doCalendar(calendarFrame):
-	from Tkinter import Label as Label
+	from Tkinter import *
 	
 	
 	# Clear and replace calendarFrame
@@ -31,30 +31,36 @@ def doCalendar(calendarFrame):
 	label_S = Label(calendarFrame, text = "Saturday")
 	label_Su = Label(calendarFrame, text = "Sunday")
 	
-	label_8.grid(row = 1, column = 0)
-	label_9.grid(row = 61, column = 0)
-	label_10.grid(row = 121, column = 0)
-	label_11.grid(row = 181, column = 0)
-	label_12.grid(row = 241, column = 0)
-	label_1.grid(row = 301, column = 0)
-	label_2.grid(row = 361, column = 0)
-	label_3.grid(row = 421, column = 0)
-	label_4.grid(row = 481, column = 0)
-	label_5.grid(row = 541, column = 0)
-	label_6.grid(row = 601, column = 0)
-	label_7.grid(row = 661, column = 0)
-	label_8P.grid(row = 721, column = 0)
-	label_9P.grid(row = 781, column = 0)
-	label_10P.grid(row = 841, column = 0)
+	label_8.grid(row = 1, column = 0, sticky='nsew')
+	label_9.grid(row = 61, column = 0, sticky='nsew')
+	label_10.grid(row = 121, column = 0, sticky='nsew')
+	label_11.grid(row = 181, column = 0, sticky='nsew')
+	label_12.grid(row = 241, column = 0, sticky='nsew')
+	label_1.grid(row = 301, column = 0, sticky='nsew')
+	label_2.grid(row = 361, column = 0, sticky='nsew')
+	label_3.grid(row = 421, column = 0, sticky='nsew')
+	label_4.grid(row = 481, column = 0, sticky='nsew')
+	label_5.grid(row = 541, column = 0, sticky='nsew')
+	label_6.grid(row = 601, column = 0, sticky='nsew')
+	label_7.grid(row = 661, column = 0, sticky='nsew')
+	label_8P.grid(row = 721, column = 0, sticky='nsew')
+	label_9P.grid(row = 781, column = 0, sticky='nsew')
+	label_10P.grid(row = 841, column = 0, sticky='nsew')
 	
-	label_time.grid(row = 0, column = 0)
-	label_M.grid(row = 0, column = 1)
-	label_T.grid(row = 0, column = 2)
-	label_W.grid(row = 0, column = 3)
-	label_R.grid(row = 0, column = 4)
-	label_F.grid(row = 0, column = 5)
-	label_S.grid(row = 0, column = 6)
-	label_Su.grid(row = 0, column = 7)
+	label_time.grid(row = 0, column = 0, sticky='nsew')
+	label_M.grid(row = 0, column = 1, sticky='nsew')
+	label_T.grid(row = 0, column = 2, sticky='nsew')
+	label_W.grid(row = 0, column = 3, sticky='nsew')
+	label_R.grid(row = 0, column = 4, sticky='nsew')
+	label_F.grid(row = 0, column = 5, sticky='nsew')
+	label_S.grid(row = 0, column = 6, sticky='nsew')
+	label_Su.grid(row = 0, column = 7, sticky='nsew')
+	
+	
+	for i in range(901):
+		calendarFrame.rowconfigure(i, weight = 1)
+	for i in range(8):
+		calendarFrame.columnconfigure(i, weight = 1)
 	
 
 def get_col(day):
@@ -92,7 +98,7 @@ def block_in_Calendar(text, open, day, start, end, calendarFrame):
 	else:
 		bg = "red"
 	
-	label = Label(calendarFrame, bg = bg, text = text)
-	label.grid(row = row1, column = col, rowspan = span)
+	label = Label(calendarFrame, bg = bg, text = text, )
+	label.grid(row = row1, column = col, rowspan = span, sticky='nsew')
 
 

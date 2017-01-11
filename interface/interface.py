@@ -387,10 +387,28 @@ def doViewClass():
 def doViewStudent(student):
 	conn = sqlite3.connect('/Users/katiedaisey/Desktop/tascheduling/try1.db')
 	cur = conn.cursor()
+	# immediate time conflicts
+	print student
+	unavail = cur.execute('''SELECT D.Day, D.Start, D.End
+		FROM Con_Student_Time B INNER JOIN Times D
+		ON B.TimeID = D.TimeID
+		WHERE B.StudentID = ?''', (student, ))
+	unavail = cur.fetchall()
+	for ut in unavail:
+		block_in_Calendar(text = '', open = 0, day = ut[0], start = ut[1], end = ut[2], calendarFrame = calendarFrame)
+	
+	prefer = cur.execute('''SELECT D.Day, D.Start, D.End
+		FROM Pref_Student_Time B INNER JOIN Times D
+		ON B.TimeID = D.TimeID
+		WHERE B.StudentID = ?''', (student, ))
+	prefer = cur.fetchall()
+	for pt in prefer:
+		block_in_Calendar(text = '', open = 1, day = pt[0], start = pt[1], end = pt[2], calendarFrame = calendarFrame)
+	
+	
+	
 	sch = cur.execute('SELECT Scheduled From Students WHERE StudentID = ?', (student,))
 	sch = cur.fetchone()
-	print sch
-	print student
 	if sch[0] > 0:
 		sch_classes = cur.execute('''SELECT A.Name, C.ShortName, B.Name, D.Day, D.Start, D.End
 			FROM Students A INNER JOIN Sections B
@@ -1098,9 +1116,9 @@ filemenu.add_separator()
 filemenu.add_command(label = "Save Schedule", command = lambda : doSave())
 filemenu.add_command(label = "Save Schedule As", command = lambda : file_save())
 filemenu.add_separator()
-filemenu.add_command(label = "Export Mailing", command = lambda: export.doExportMail())
-filemenu.add_command(label = "Export Linda", command = lambda: export.doExportLinda())
-filemenu.add_command(label = "Export All", command = lambda: export.doExportAll())
+filemenu.add_command(label = "Export Mailing", command = lambda: export.doExportMail(output2 = output))
+filemenu.add_command(label = "Export Linda", command = lambda: export.doExportLinda(output2 = output))
+filemenu.add_command(label = "Export All", command = lambda: export.doExportAll(output2 = output))
 filemenu.add_separator()
 filemenu.add_command(label = "Exit", command = doQuit)
 

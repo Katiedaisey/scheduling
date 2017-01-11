@@ -1,6 +1,6 @@
 # Export Functions
 
-def doExportMail(output):
+def doExportMail(output2):
 	import sqlite3
 	
 	conn = sqlite3.connect('/Users/katiedaisey/Desktop/tascheduling/try1.db')
@@ -35,7 +35,7 @@ def doExportMail(output):
 		
 		
 	# write to .csv
-	filename = output + "/mailinglist.tsv"
+	filename = output2 + "/mailinglist.tsv"
 	header = "Email\tStudent\tClass1(Long)\tClass1(Short)\tSection1\tProf1\tDay1\tTime1\tClass2(Long)\tClass2(Short)\tSection2\tProf2\tDay2\tTime2\tClass3(Long)\tClass3(Short)\tSection3\tProf3\tDay3\tTime3"
 	print header
 	with open(filename, 'wb') as f:
@@ -49,7 +49,7 @@ def doExportMail(output):
 
 #doExportMail("output")
 
-def doExportLinda(output):
+def doExportLinda(output2):
 	import sqlite3
 	conn = sqlite3.connect('/Users/katiedaisey/Desktop/tascheduling/try1.db')
 	cur = conn.cursor()
@@ -66,7 +66,7 @@ def doExportLinda(output):
 		for s in secs:
 			allsecs = allsecs + s[1] + " (" + s[0] + ")" + "\t"
 	
-	filename = output + "/classeslist.tsv"
+	filename = output2 + "/classeslist.tsv"
 	with open(filename, 'wb') as f:
 		for row in classes:
 			f.write(row[1] + "\t" + allsecs)
@@ -76,7 +76,7 @@ def doExportLinda(output):
 #doExportLinda("output")
 
 
-def doExportAll(output):
+def doExportAll(output2):
 	import sqlite3
 	conn = sqlite3.connect('/Users/katiedaisey/Desktop/tascheduling/try1.db')
 	cur = conn.cursor()
@@ -95,7 +95,7 @@ def doExportAll(output):
 	rows = cur.fetchall()
 	
 	
-	filename = output + "/allschedule.tsv"
+	filename = output2 + "/allschedule.tsv"
 	with open(filename, 'wb') as f:
 		f.write("TA Name\tEmail\tAmount Scheduled\tYear\tDivision\tSkill Level\tSection\tClass Name(Short)\tClass Name (Long)\tClass Worth\tProfessor Name\tDay\tTime\t\n")
 		for row in rows:

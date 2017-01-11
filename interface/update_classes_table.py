@@ -120,13 +120,13 @@ def update_classes_table():
 	
 	# create YDS
 	years = [1,2,3,4,5,"any"]
-	skill = [1,2,3,4,5,"any"]
-	division = ["A", "B", "I", "O", "P", "any"]
+	skills = [1,2,3,4,5,"any"]
+	divisions = ["A", "B", "I", "O", "P", "any"]
 	
 	for i in range(6):
 		cur.execute('INSERT OR IGNORE INTO Year (Name) VALUES(?)', (years[i],))
-		cur.execute('INSERT OR IGNORE INTO Division (Name) VALUES(?)', (division[i],))
-		cur.execute('INSERT OR IGNORE INTO Skill (Name) VALUES(?)', (skill[i],))
+		cur.execute('INSERT OR IGNORE INTO Division (Name) VALUES(?)', (divisions[i],))
+		cur.execute('INSERT OR IGNORE INTO Skill (Name) VALUES(?)', (skills[i],))
 	
 	
 	# update from each row in listings.csv
@@ -185,6 +185,48 @@ def update_classes_table():
 			
 			
 			# get YDS
+			if entry[2] == 'any':
+				#for y in years[:-1]:
+				#	cur.execute('SELECT PrimaryKey FROM Year WHERE Name = ?',(y,))
+				#	YearID = cur.fetchone()[0]
+				cur.execute('UPDATE Classes SET YearID = ? WHERE ClassID = ?',(6, ClassID))
+				entry[2] = '12345'
+			if entry[2] != 'any':
+				for y in entry[2]:
+					cur.execute('SELECT PrimaryKey FROM Year WHERE Name = ?',(y,))
+					YearID = cur.fetchone()[0]
+					cur.execute('UPDATE Classes SET YearID = ? WHERE ClassID = ?',(YearID, ClassID))
+			
+			if entry[3] == 'any':
+				#for y in divisions[:-1]:
+				#	print y
+				#	cur.execute('SELECT PrimaryKey FROM Division WHERE Name = ?',(y,))
+				#	DivisionID = cur.fetchone()[0]
+				cur.execute('UPDATE Classes SET DivisionID = ? WHERE ClassID = ?',(6, ClassID))
+				entry[3] = 'ABIOP'
+			if entry[3] != 'any':
+				for y in entry[3]:
+					cur.execute('SELECT PrimaryKey FROM Division WHERE Name = ?',(y,))
+					DivisionID = cur.fetchone()[0]
+					cur.execute('UPDATE Classes SET DivisionID = ? WHERE ClassID = ?',(DivisionID, ClassID))
+			
+			
+			if entry[4] == 'any':
+				#for y in skills[:-1]:
+				#	cur.execute('SELECT PrimaryKey FROM Skill WHERE Name = ?',(y,))
+				#	SkillID = cur.fetchone()[0]
+				cur.execute('UPDATE Classes SET SkillID = ? WHERE ClassID = ?',(6, ClassID))
+				entry[4] = '12345'
+			if entry[4] != 'any':
+				for y in entry[4]:
+					cur.execute('SELECT PrimaryKey FROM Skill WHERE Name = ?',(y,))
+					SkillID = cur.fetchone()[0]
+					cur.execute('UPDATE Classes SET SkillID = ? WHERE ClassID = ?',(SkillID, ClassID))
+					
+			
+			
+			
+			
 			year = entry[2]
 			if '1' in year:
 				cur.execute('INSERT OR IGNORE INTO Sections_Year (SectionID, YearID) VALUES (?, ?)', (SectionID, 1))
@@ -230,6 +272,7 @@ def update_classes_table():
 				cur.execute('INSERT OR IGNORE INTO Sections_Skill (SectionID, SkillID) VALUES (?, ?)', (SectionID, 5))
 			if '6' in skill:
 				cur.execute('INSERT OR IGNORE INTO Sections_Skill (SectionID, SkillID) VALUES (?, ?)', (SectionID, 6))
+			
 			
 			
 			# create and get TimeID

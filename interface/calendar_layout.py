@@ -22,6 +22,8 @@ def doCalendar(calendarFrame):
 	label_9P = Label(calendarFrame, text=" 9:00 PM")
 	label_10P = Label(calendarFrame, text="10:00 PM")
 	
+	label_add = Label(calendarFrame, text = "Info: ")
+	
 	label_time = Label(calendarFrame, text = "Time")
 	label_M = Label(calendarFrame, text = "Monday")
 	label_T = Label(calendarFrame, text = "Tuesday")
@@ -46,6 +48,7 @@ def doCalendar(calendarFrame):
 	label_8P.grid(row = 721, column = 0, sticky='nsew')
 	label_9P.grid(row = 781, column = 0, sticky='nsew')
 	label_10P.grid(row = 841, column = 0, sticky='nsew')
+	label_add.grid(row = 903, column = 0, sticky='nsew')
 	
 	label_time.grid(row = 0, column = 0, sticky='nsew')
 	label_M.grid(row = 0, column = 1, sticky='nsew')
@@ -105,4 +108,8 @@ def block_in_Calendar(text, open, day, start, end, calendarFrame):
 	label = Label(calendarFrame, bg = bg, text = text, )
 	label.grid(row = row1, column = col, rowspan = span, sticky='nsew')
 
+def add_info_Calendar(text, calendarFrame):
+	from Tkinter import Label as Label
+	label = Label(calendarFrame, text = text)
+	label.grid(row = 903, column = 1, columnspan = 7, sticky = 'nsew')
 

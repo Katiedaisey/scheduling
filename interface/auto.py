@@ -101,7 +101,6 @@ def gen_sec_matrix(pop, keep, output):
 	for r in require:
 		mat_base[(r),:] = require[r]
 		mat_base[:,(r)] = require[r]
-		
 		if sec_worth[r][0] > 0.29 and sec_worth[r][0] < 0.35:
 			base_third.remove(r)
 		if sec_worth[r][0] > 0.49 and sec_worth[r][0] < 0.51:
@@ -140,7 +139,6 @@ def gen_sec_matrix(pop, keep, output):
 				mpref = list(set(left_third).intersection(mpref))
 				try:
 					u = random.choice(mpref) # a best choice remains
-					print r,u
 				except:
 					u = random.choice(left_third) # a lesser choice
 				left_third.remove(u)
@@ -204,35 +202,60 @@ def gen_sec_matrix(pop, keep, output):
 		
 		# schedule full ta lines
 		while len(left_third) > 2:
-			
 			u = random.choice(left_third)
 			left_third.remove(u)
-			l1 = random.choice(left_third)
-			left_third.remove(l1)
-			l2 = random.choice(left_third)
-			left_third.remove(l2)
 			
+			mpref = sec_prefs[u,:] # only class scheduled
+			mpref = [i for i, j in enumerate(mpref) if j == max(mpref)]
+			mpref = list(set(left_third).intersection(mpref))
 			
-			mat_pos[u,l1] = 1
-			mat_pos[u,l2] = 1
-			mat_pos[l1,u] = 1
+			# get best two combo classes
+			mprefmax = []
+			listmprefmax = []
+			for i in range(len(mpref)):
+				leftmpref = mpref[:i] + mpref[i+1:]
+				for j in range(len(leftmpref)):
+					listmprefmax.append([mpref[i],leftmpref[j]])
+					newmax = sec_prefs[r[0],mpref[i]] + sec_prefs[r[0],leftmpref[j]] + sec_prefs[mpref[i],leftmpref[j]]
+					mprefmax.append(newmax)
+			mpref = [i for i, j in enumerate(mprefmax) if j == max(mprefmax)]
+			mpref = [listmprefmax[i] for i in mpref]
+			try:
+				l1 = random.choice(mpref)
+				l2 = l1[1]
+				l1 = l1[0]
+				left_third.remove(l1)
+				left_third.remove(l2)
+			except:
+				l1 = random.choice(left_third)
+				left_third.remove(l1)
+				l2 = random.choice(left_third)
+				left_third.remove(l2)
+			
+			mat_pos[u ,l1] = 1
+			mat_pos[l1, u] = 1
+			mat_pos[u ,l2] = 1
+			mat_pos[l2, u] = 1
 			mat_pos[l1,l2] = 1
-			mat_pos[l2,u] = 1
 			mat_pos[l2,l1] = 1
+			
 		
 		while len(left_half) > 1:
-			
 			u = random.choice(left_half)
 			left_half.remove(u)
-			l1 = random.choice(left_half)
+			mpref = sec_prefs[u,:] # randomly chosen class
+			mpref = [i for i, j in enumerate(mpref) if j == max(mpref)]
+			mpref = list(set(left_half).intersection(mpref))
+			try:
+				l1 = random.choice(mpref) # a best choice remains
+			except:
+				l1 = random.choice(left_half) # a lesser choice
 			left_half.remove(l1)
 			
-			
-			
-			mat_pos[u,l1] = 1
-			mat_pos[l1,u] = 1
+			mat_pos[ u,l1] = 1
+			mat_pos[l1, u] = 1
 		
-		while len(left_single) > 0:
+		while len(left_single) > 0: # randomly choose a classe
 			u = random.choice(left_single)
 			left_single.remove(u)
 			
@@ -263,6 +286,8 @@ def gen_sec_matrix(pop, keep, output):
 			u = random.choice(left_half)
 			left_half.remove(u)
 		
+		
+		
 		newmat = mat_pos * sec_prefs # element wise multiplication
 		newvalue = sum(sum(newmat))
 		
@@ -279,7 +304,7 @@ def gen_sec_matrix(pop, keep, output):
 	return(keepmat)
 
 
-m = gen_sec_matrix(100,10, "output")
+#m = gen_sec_matrix(1,1, "output")
 
 
 
@@ -407,7 +432,7 @@ def break_up(output):
 		np.save(output + "/matrices/mat_" + str(count) + ".npy", matrix)
 		count = count + 1
 
-break_up("test1")
+#break_up("output")
 
 def break_up2(output):
 	matrices = np.load(output + "/best_stu_sec.npy")
@@ -423,7 +448,7 @@ def break_up2(output):
 		np.save(output + "/matrices2/mat_" + str(count) + ".npy", matrix)
 		count = count + 1
 
-#break_up2("test1")
+#break_up2("output")
 
 def updateDatabase(schedule, output, mat_pref):
 	conn = sqlite3.connect('/Users/katiedaisey/Desktop/tascheduling/try1.db')

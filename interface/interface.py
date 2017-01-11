@@ -599,6 +599,8 @@ def openaddselect(): #Schedule
 		cur = conn.cursor()
 		stu = cur.execute('SELECT StudentID FROM Students WHERE Name = ?',(current[0],))
 		stu = cur.fetchone()[0]
+		
+		# byClass add student to specific section of class
 		if current_section != "any":
 			global mat_yes
 			global mat_no
@@ -615,11 +617,23 @@ def openaddselect(): #Schedule
 			c = cur.execute('UPDATE Sections SET StudentID = ? WHERE SectionID = ?', (stu, sec)) # wonder why this doesn't work with an AND statement
 			conn.commit()
 		
-		
+		# byClass add student to any section of class
 		if current_section == "any":
 			addPrefForClass(stu)
+			global mat_yes
+			global mat_add
+			global mat_no
+			cur.execute('SELECT A.SectionID FROM Sections A INNER JOIN Classes B ON A.ClassID = B.ClassID WHERE B.ShortName = ?',(current_class,))
+			secs = fetchall()
+			global section_index
+			for sec in secs:
+				secID = section_index[sec]
+				mat_yes[stuID,secID] = 0
+				mat_add[stuID,secID] = 1
+				mat_no[stuID,secID] = 0
+				
 			
-			value = get_class_value(sec)
+			value = get_class_value(secs[0])
 			oldvalue = cur.execute('SELECT Scheduled FROM Students WHERE StudentID = ?',(stu, ) )
 			oldvalue = cur.fetchone()[0]
 			c = cur.execute('UPDATE Students SET Scheduled = ? WHERE StudentID = ?',(float(oldvalue) + float(value),  stu) )
@@ -690,6 +704,17 @@ def openaddselect(): #Schedule
 		
 		if current_section == "any":
 			addPrefForClass(stu)
+			global mat_yes
+			global mat_add
+			global mat_no
+			cur.execute('SELECT A.SectionID FROM Sections A INNER JOIN Classes B ON A.ClassID = B.ClassID WHERE B.ShortName = ?',(current_class,))
+			secs = fetchall()
+			global section_index
+			for sec in secs:
+				secID = section_index[sec]
+				mat_yes[stuID,secID] = 0
+				mat_add[stuID,secID] = 1
+				mat_no[stuID,secID] = 0
 			
 			value = get_class_value(sec)
 			oldvalue = cur.execute('SELECT Scheduled FROM Students WHERE StudentID = ?',(stu, ) )
@@ -718,6 +743,8 @@ def openremoveselect(): #Remove
 		stu = cur.fetchone()[0]
 		if current_section != "any":
 			global mat_yes
+			global student_index
+			global section_index
 			stuID = student_index[stu]
 			secID = section_index[sec]
 			mat_yes[stuID, secID] = 0
@@ -732,7 +759,7 @@ def openremoveselect(): #Remove
 			
 			conn.commit()
 		
-		
+		# byClass remove student from any section
 		if current_section == "any":
 
 			secs = cur.execute('''SELECT A.SectionID FROM Classes B
@@ -744,9 +771,21 @@ def openremoveselect(): #Remove
 				secID = section_index[s[0]]
 				cpref = mat_prefs[stuID,secID]
 				mat_prefs[stuID,secID] = int(cpref) + 500
-				
 			
-			value = get_class_value(sec)
+			global mat_yes
+			global mat_add
+			global mat_no
+			cur.execute('SELECT A.SectionID FROM Sections A INNER JOIN Classes B ON A.ClassID = B.ClassID WHERE B.ShortName = ?',(current_class,))
+			secs = fetchall()
+			global section_index
+			for sec in secs:
+				secID = section_index[sec]
+				mat_yes[stuID,secID] = 0
+				mat_add[stuID,secID] = 0
+				mat_no[stuID,secID] = 0
+			
+			
+			value = get_class_value(secs[0])
 			oldvalue = cur.execute('SELECT Scheduled FROM Students WHERE StudentID = ?',(stu, ) )
 			oldvalue = cur.fetchone()[0]
 			c = cur.execute('Update Students SET Scheduled = ? WHERE StudentID = ?',(float(oldvalue) - float(value), stu) )
@@ -812,10 +851,25 @@ def openremoveselect(): #Remove
 			conn.commit()
 		
 		
+		# byStudent remove from any section
 		if current_section == "any":
+			global current_class
 			removePrefForClass(stu)
 			
-			value = get_class_value(sec)
+			global mat_yes
+			global mat_add
+			global mat_no
+			cur.execute('SELECT A.SectionID FROM Sections A INNER JOIN Classes B ON A.ClassID = B.ClassID WHERE B.ShortName = ?',(current_class,))
+			secs = fetchall()
+			global section_index
+			for sec in secs:
+				secID = section_index[sec]
+				mat_yes[stuID,secID] = 0
+				mat_add[stuID,secID] = 1
+				mat_no[stuID,secID] = 0
+			
+			cur.execute('SELECT Worth FROM Classes WHERE ClassID = ?', (current_class,))
+			value = cur.fetchone()[0]
 			oldvalue = cur.execute('SELECT Scheduled FROM Students WHERE StudentID = ?',(stu, ) )
 			oldvalue = cur.fetchone()[0]
 			c = cur.execute('UPDATE Students SET Scheduled = ? WHERE StudentID = ?',(float(oldvalue) - float(value),  stu) )
@@ -855,30 +909,84 @@ def openaddblockselect(): #Add Block
 		cur = conn.cursor()
 		stu = cur.execute('SELECT StudentID FROM Students WHERE Name = ?',(current[0],))
 		stu = cur.fetchone()[0]
-		global mat_yes
-		global mat_no
+		global student_index
 		stuID = student_index[stu]
-		secID = section_index[sec]
-		mat_yes[stuID, secID] = 0
-		mat_no[stuID, secID] = 1
-		message = "Student Blocked From Class!"
-		d.set(message)
+		
+		if current != "any":
+			global mat_yes
+			global mat_no
+			global section_index
+			secID = section_index[sec]
+			mat_yes[stuID, secID] = 0
+			mat_no[stuID, secID] = 1
+		
+		# byClass block of student from any section in class
+		if current == 'any':
+			removePrefForClass(stu)
+			
+			cur.execute('SELECT ClassID FROM Classes WHERE ShortName = ?', (current_class,))
+			ClassID = cur.fetchone()[0]
+			cur.execute('SELECT SectionID FROM Sections WHERE ClassID = ?'
+			, (ClassID,))
+			secs = cur.fetchall()
+			for sec in secs:
+				secID = section_index[sec]
+				mat_yes[stuID,secID] = 0
+				mat_no[stuID,secID] = 1
+			
+			
+			conn.commit()
+	
+	
+	# byStudent block from class
 	if scheduling == 'student':
-		current = chosenListbox.get(ANCHOR)
+		current = openListbox.get(ANCHOR)
+		print current
 		global current_section
 		conn = sqlite3.connect('/Users/katiedaisey/Desktop/tascheduling/try1.db')
 		cur = conn.cursor()
 		if current == "any":
 			current_section = "any"
 		else:
+			print current
 			current_section = current[1]
-			
-			
-			cla = cur.execute('SELECT ClassID FROM Classes WHERE ShortName = ?',(current_class,))
+		
+		stu = current_student.split(":")[0]
+		stu = int(stu)
+		global student_index
+		stuID = student_index[stu] #where stu from
+		
+		# byStudent block from single section of class
+		if current_section != 'any':
+			global mat_yes
+			global mat_no
+			global section_index
+			cur.execute('SELECT ClassID FROM Classes WHERE ShortName = ?',(current_class,))
 			cla = cur.fetchone()[0]
-			sec1 = cur.execute('SELECT SectionID FROM Sections WHERE ClassID = ? and Name = ?', (cla, current_section))
-			global sec
+			cur.execute('SELECT SectionID FROM Sections WHERE ClassID = ? and Name = ?', (cla, current_section))
 			sec = cur.fetchone()[0]
+			secID = section_index[sec]
+			mat_yes[stuID,secID] = 0
+			mat_no[stuID,secID] = 1
+		
+		#by Student block of any section of class
+		if current_section == 'any':
+			global mat_yes
+			global mat_no
+			global section_index
+			cur.execute('SELECT ClassID FROM Classes WHERE ShortName = ?', (current_class,))
+			cla = cur.fetchone()[0]
+			cur.execute('SELECT SectionID FROM Sections WHERE ClassID = ?'
+			, (cla,))
+			secs = cur.fetchall()
+			for sec in secs:
+				secID = section_index[sec]
+				mat_yes[stuID,secID] = 0
+				mat_no[stuID,secID] = 1
+			removePrefForClass(stu)
+		
+	message = "Student Blocked From Class!"
+	d.set(message)
 	
 def openremoveblockselect(): #Remove Block
 	# remove block from student from class
@@ -890,14 +998,18 @@ def openremoveblockselect(): #Remove Block
 		cur = conn.cursor()
 		stu = cur.execute('SELECT StudentID FROM Students WHERE Name = ?',(current[0],))
 		stu = cur.fetchone()[0]
+		global student_index
 		stuID = student_index[stu]
-		secID = section_index[sec]
-		mat_no[stuID, secID] = 0
-		message = "Student Block Removed!"
-		d.set(message)
+		
+		if current != 'any':
+			global mat_no
+			global section_index
+			secID = section_index[sec]
+			mat_no[stuID, secID] = 0
+		
 	
 	if scheduling == 'student':
-		current = chosenListbox.get(ANCHOR)
+		current = openListbox.get(ANCHOR)
 		global current_section
 		conn = sqlite3.connect('/Users/katiedaisey/Desktop/tascheduling/try1.db')
 		cur = conn.cursor()
@@ -905,13 +1017,28 @@ def openremoveblockselect(): #Remove Block
 			current_section = "any"
 		else:
 			current_section = current[1]
-			
-			
-			cla = cur.execute('SELECT ClassID FROM Classes WHERE ShortName = ?',(current_class,))
+		
+		stu = current_student.split(":")[0]
+		stu = int(stu)
+		global student_index
+		stuID = student_index[stu]
+		
+		# byStudent remove block from single section of class
+		if current_section != 'any':
+			global mat_yes
+			global mat_no
+			global section_index
+			cur.execute('SELECT ClassID FROM Classes WHERE ShortName = ?',(current_class,))
 			cla = cur.fetchone()[0]
-			sec1 = cur.execute('SELECT SectionID FROM Sections WHERE ClassID = ? and Name = ?', (cla, current_section))
-			global sec
+			cur.execute('SELECT SectionID FROM Sections WHERE ClassID = ? and Name = ?', (cla, current_section))
 			sec = cur.fetchone()[0]
+			secID = section_index[sec]
+			mat_yes[stuID,secID] = 0
+			mat_no[stuID,secID] = 0
+			
+	
+	message = "Student Block Removed!"
+	d.set(message)
 
 
 def addPrefForClass(student):
@@ -926,7 +1053,7 @@ def addPrefForClass(student):
 	for s in secs:
 		secID = section_index[s[0]]
 		cpref = mat_prefs[stuID,secID]
-		mat_prefs[stuID,secID] = int(cpref) + 1000
+		mat_prefs[stuID,secID] = int(cpref) + 10000
 
 def removePrefForClass(student):
 	conn = sqlite3.connect('/Users/katiedaisey/Desktop/tascheduling/try1.db')
@@ -940,7 +1067,7 @@ def removePrefForClass(student):
 	for s in secs:
 		secID = section_index[s[0]]
 		cpref = mat_prefs[stuID,secID]
-		mat_prefs[stuID,secID] = int(cpref) - 1000
+		mat_prefs[stuID,secID] = int(cpref) - 10000
 
 
 # File functions
@@ -955,6 +1082,8 @@ def doNewSchedule():
 	student_index = matrices.student_index()
 	global mat_yes
 	mat_yes = matrices.matrix_schedule_manual()
+	global mat_add
+	mat_add = matrices.matrix_schedule_manual()
 	global mat_no
 	mat_no = matrices.matrix_schedule_manual()
 	global matrix_sections
@@ -1035,8 +1164,10 @@ def doOpenSchedule(output2 = None):
 	
 	global mat_yes
 	mat_yes = np.load(output + "/mat_yes.npy")
-	#global mat_no
-	#mat_no = np.load(output + "/mat_no.npy")
+	global mat_add
+	mat_add = np.load(output + "/mat_add.npy")
+	global mat_no
+	mat_no = np.load(output + "/mat_no.npy")
 	global matrix_sections
 	matrix_sections = np.load(output + "/matrix_sections.npy")
 	global mat_prefs
@@ -1052,8 +1183,9 @@ def doOpenSchedule(output2 = None):
 
 
 def doSave(output2):
-	np.save(output2 + "/mat_yes.npy",mat_yes)
-	np.save(output + "/mat_no.npy", mat_no)
+	np.save(output2 + "/mat_yes.npy", mat_yes)
+	np.save(output2 + "/mat_add.npy", mat_add)
+	np.save(output2 + "/mat_no.npy", mat_no)
 	np.save(output2 + "/matrix_sections.npy", matrix_sections)
 	np.save(output2 + "/mat_prefs.npy", mat_prefs)
 	message = "Saved"
@@ -1061,7 +1193,7 @@ def doSave(output2):
 
 
 
-def file_save():
+def doSaveAs():
 	
 	import os
 	import errno
@@ -1098,8 +1230,9 @@ def file_save():
 	
 	make_sure_path_exists(output)
 	#np.save(output + "/automats", automats)
-	np.save(output + "/mat_yes",mat_yes)
-	np.save(output + "/mat_no", mat_no)
+	np.save(output + "/mat_yes.npy",mat_yes)
+	np.save(output + "/mat_add.npy", mat_add)
+	np.save(output + "/mat_no.npy", mat_no)
 	np.save(output + "/mat_prefs.npy", mat_prefs)
 	np.save(output + "/matrix_sections.npy", matrix_sections)
 	message = "Saved"
@@ -1184,8 +1317,8 @@ menu.add_cascade(label = "Google Survey", menu = googlemenu)
 filemenu.add_command(label = "New Schedule", command=lambda : doNewSchedule())
 filemenu.add_command(label = "Open Schedule", command = lambda: doOpenSchedule())
 filemenu.add_separator()
-filemenu.add_command(label = "Save Schedule", command = lambda : doSave())
-filemenu.add_command(label = "Save Schedule As", command = lambda : file_save())
+filemenu.add_command(label = "Save Schedule", command = lambda : doSave(output))
+filemenu.add_command(label = "Save Schedule As", command = lambda : doSaveAs())
 filemenu.add_separator()
 filemenu.add_command(label = "Export Mailing", command = lambda: export.doExportMail(output2 = output))
 filemenu.add_command(label = "Export Linda", command = lambda: export.doExportLinda(output2 = output))

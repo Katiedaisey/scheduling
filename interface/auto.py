@@ -216,7 +216,7 @@ def gen_sec_matrix(pop, keep, output):
 				leftmpref = mpref[:i] + mpref[i+1:]
 				for j in range(len(leftmpref)):
 					listmprefmax.append([mpref[i],leftmpref[j]])
-					newmax = sec_prefs[r[0],mpref[i]] + sec_prefs[r[0],leftmpref[j]] + sec_prefs[mpref[i],leftmpref[j]]
+					newmax = sec_prefs[u,mpref[i]] + sec_prefs[u,leftmpref[j]] + sec_prefs[mpref[i],leftmpref[j]]
 					mprefmax.append(newmax)
 			mpref = [i for i, j in enumerate(mprefmax) if j == max(mprefmax)]
 			mpref = [listmprefmax[i] for i in mpref]
@@ -335,7 +335,8 @@ def gen_sec_stu_matrix(mat_prefs, pop, keep, mats, output):
 	
 	# first scheduled students
 	mat_yes = np.load(output + "/mat_yes.npy")
-	#mat_no = np.load(output + "/mat_no.npy")
+	mat_add = np.load(output + "/mat_add.npy")
+	mat_no = np.load(output + "/mat_no.npy")
 	m = np.sum(mat_yes, axis = 1)
 	#mat_sch = mat_yes[:,:]
 	#mat_sch.flags.writeable = True
@@ -360,15 +361,33 @@ def gen_sec_stu_matrix(mat_prefs, pop, keep, mats, output):
 			if s[0] > 0: #scheduled at all - already has line
 				# count2 is student
 				# need to get sections student has
-				base_stu.remove(count2)
 				#mat_base[count2,:] = mat_sch[count2,:]
-				cl = [i for i, x in enumerate(mat_base[count2,:]) if x==1]
-				# get line containing classes student is scheduled for
-				# replace student schedule with line with additional classes
-				mat_base[count2,:] = mat_sch[cl[0],:]
+				
 				# remove sections from list to be scheduled
-				for c in cl:
-					base_sec.remove(c)
+				cl = [i for i, x in enumerate(mat_base[count2,:]) if x==1]
+				print len(cl)
+				# scheduled via single section
+				if len(cl) > 0:
+					
+					# get line containing classes student is scheduled for
+					# replace student schedule with line with additional classes
+					mat_base[count2,:] = mat_sch[cl[0],:]
+					base_stu.remove(count2)
+					
+					
+				# not scheduled via mat_yes, pref for class
+				if len(cl) == 0:
+					cl = [i for i, x in enumerate(mat_add[count2,:]) if x==1]
+					print cl
+					cl = random.choice(cl)
+					mat_base[count2,:] = mat_sch[cl,:]
+					# get line containing classes student is scheduled for
+				
+				# remove classes scheduled
+				cl = [i for i, x in enumerate(mat_base[count2,:]) if x==1]
+					for c in cl:
+						base_sec.remove(c)
+				
 			count2 = count2 + 1
 		
 		for p in range(pop):

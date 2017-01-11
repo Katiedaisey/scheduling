@@ -40,14 +40,14 @@ def get_require(output):
 	m = np.sum(mat_yes, axis = 1)
 	required = dict()
 	for student in range(len(m)):
-		if m[student] > 1:
+		if m[student] > 0:
 			classes = mat_yes[student,:]
 			cl = classes.tolist()
 			cl = [i for i, x in enumerate(cl) if x==1]
 			for c in cl:
 				required[c] = classes
 	return(required)
-#m = get_require("interface/new")
+#m = get_require("output")
 
 
 def get_require2(output):
@@ -57,7 +57,7 @@ def get_require2(output):
 	count = 0
 	required = list()
 	for student in range(len(m)):
-		if m[student] > 1:
+		if m[student] > 0:
 			classes = mat_yes[student,:]
 			cl = classes.tolist()
 			cl = [i for i, x in enumerate(cl) if x==1]
@@ -111,7 +111,6 @@ def gen_sec_matrix(pop, keep, output):
 	
 	
 	
-	
 	value = [None] * keep
 	keepmat = [[None]] * keep
 	count = 0
@@ -123,12 +122,11 @@ def gen_sec_matrix(pop, keep, output):
 		
 		
 		# fill up "required" lines
-		require = get_require2(output)
-		for r in require:
+		require2 = get_require2(output)
+		for r in require2:
 			worth = 0
 			for c in r:
 				worth = worth + sec_worth[c][0]
-			
 			
 			# check if line is full
 			#if worth > 0.9:
@@ -136,7 +134,15 @@ def gen_sec_matrix(pop, keep, output):
 			
 			if worth < 0.9 and worth > 0.59:
 				# 2/3 sections
-				u = random.choice(left_third)
+				# switch from random.choice to best possible left
+				mpref =  sec_prefs[r[0],:] + sec_prefs[r[1],:]
+				mpref = [i for i, j in enumerate(mpref) if j == max(mpref)]
+				mpref = list(set(left_third).intersection(mpref))
+				try:
+					u = random.choice(mpref) # a best choice remains
+					print r,u
+				except:
+					u = random.choice(left_third) # a lesser choice
 				left_third.remove(u)
 				
 				for c in r:
@@ -145,7 +151,13 @@ def gen_sec_matrix(pop, keep, output):
 			
 			# 1/2 scheduled
 			if worth > 0.49 and worth < 0.51:
-				u = random.choice(left_half)
+				mpref = sec_prefs[r[0],:] # only class scheduled
+				mpref = [i for i, j in enumerate(mpref) if j == max(mpref)]
+				mpref = list(set(left_half).intersection(mpref))
+				try:
+					u = random.choice(mpref) # a best choice remains
+				except:
+					u = random.choice(left_half) # a lesser choice
 				left_half.remove(u)
 				for c in r:
 					mat_pos[c,u] = 1
@@ -153,10 +165,32 @@ def gen_sec_matrix(pop, keep, output):
 			
 			# 1/3 scheduled
 			if worth > 0.25 and worth < 0.35:
-				u = random.choice(left_third)
-				left_third.remove(u)
-				l1 = random.choice(left_third)
-				left_third.remove(u)
+				mpref = sec_prefs[r[0],:] # only class scheduled
+				mpref = [i for i, j in enumerate(mpref) if j == max(mpref)]
+				mpref = list(set(left_third).intersection(mpref))
+				
+				# get best two combo classes
+				mprefmax = []
+				listmprefmax = []
+				for i in range(len(mpref)):
+					leftmpref = mpref[:i] + mpref[i+1:]
+					for j in range(len(leftmpref)):
+						listmprefmax.append([mpref[i],leftmpref[j]])
+						newmax = sec_prefs[r[0],mpref[i]] + sec_prefs[r[0],leftmpref[j]] + sec_prefs[mpref[i],leftmpref[j]]
+						mprefmax.append(newmax)
+				mpref = [i for i, j in enumerate(mprefmax) if j == max(mprefmax)]
+				mpref = [listmprefmax[i] for i in mpref]
+				try:
+					u = random.choice(mpref)
+					l1 = u[1]
+					u = u[0]
+					left_third.remove(u)
+					left_third.remove(l1)
+				except:
+					u = random.choice(left_third)
+					left_third.remove(u)
+					l1 = random.choice(left_third)
+					left_third.remove(u)
 				
 				for c in r:
 					mat_pos[c,u] = 1
@@ -245,7 +279,7 @@ def gen_sec_matrix(pop, keep, output):
 	return(keepmat)
 
 
-#m = gen_sec_matrix(1000,100, "test1")
+m = gen_sec_matrix(100,10, "output")
 
 
 
@@ -306,11 +340,6 @@ def gen_sec_stu_matrix(mat_prefs, pop, keep, mats, output):
 				cl = [i for i, x in enumerate(mat_base[count2,:]) if x==1]
 				# get line containing classes student is scheduled for
 				# replace student schedule with line with additional classes
-				print count2
-				print mat_base[count2,:]
-				print cl
-				print cl[0]
-				print mat_sch.shape
 				mat_base[count2,:] = mat_sch[cl[0],:]
 				# remove sections from list to be scheduled
 				for c in cl:
@@ -378,7 +407,7 @@ def break_up(output):
 		np.save(output + "/matrices/mat_" + str(count) + ".npy", matrix)
 		count = count + 1
 
-#break_up("test1")
+break_up("test1")
 
 def break_up2(output):
 	matrices = np.load(output + "/best_stu_sec.npy")

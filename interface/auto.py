@@ -334,9 +334,9 @@ def gen_sec_stu_matrix(mat_prefs, pop, keep, mats, output):
 	
 	
 	# first scheduled students
-	mat_yes = np.load(output + "/mat_yes.npy")
-	mat_add = np.load(output + "/mat_add.npy")
-	mat_no = np.load(output + "/mat_no.npy")
+	mat_yes = np.load(output + "/mat_yes.npy") # single section sch
+	mat_add = np.load(output + "/mat_add.npy") # any section sch
+	mat_no = np.load(output + "/mat_no.npy") # block
 	m = np.sum(mat_yes, axis = 1)
 	#mat_sch = mat_yes[:,:]
 	#mat_sch.flags.writeable = True
@@ -375,18 +375,17 @@ def gen_sec_stu_matrix(mat_prefs, pop, keep, mats, output):
 					base_stu.remove(count2)
 					
 					
-				# not scheduled via mat_yes, pref for class
+				# any section, via mat_add, pref for class
 				if len(cl) == 0:
 					cl = [i for i, x in enumerate(mat_add[count2,:]) if x==1]
-					print cl
 					cl = random.choice(cl)
 					mat_base[count2,:] = mat_sch[cl,:]
 					# get line containing classes student is scheduled for
 				
 				# remove classes scheduled
 				cl = [i for i, x in enumerate(mat_base[count2,:]) if x==1]
-					for c in cl:
-						base_sec.remove(c)
+				for c in cl:
+					base_sec.remove(c)
 				
 			count2 = count2 + 1
 		
@@ -415,27 +414,29 @@ def gen_sec_stu_matrix(mat_prefs, pop, keep, mats, output):
 					except:
 						continue
 				
+			# check that blocks in mat_no are statisfied
+			m = mat_sch1 * mat_no
+			m = np.sum(m)
+			if m == 0: # no blocks were violated 
+				newmat = mat_sch1 * stu_sec_prefs # element wise multiplication
+				newvalue = sum(sum(newmat))
 				
-			
-			newmat = mat_sch1 * stu_sec_prefs # element wise multiplication
-			newvalue = sum(sum(newmat))
-			
-			if newvalue > value[count] or value[count] is None:
-				value[count] = newvalue
-				keepmat[count] = mat_sch1
-				# keep only best matrices
-				if count < (keep - 1):
-					count = count + 1
-				elif count == (keep - 1):
-					count = 0
+				if newvalue > value[count] or value[count] is None:
+					value[count] = newvalue
+					keepmat[count] = mat_sch1
+					# keep only best matrices
+					if count < (keep - 1):
+						count = count + 1
+					elif count == (keep - 1):
+						count = 0
 			
 	np.save(output + '/best_stu_sec.npy', keepmat)
 	return(keepmat)
 
 #import numpy as np
-#prefs = np.load("test1/mat_prefs.npy")
+#prefs = np.load("output/mat_prefs.npy")
 #gen_sec_stu_matrix(mat_prefs, pop, keep, mats, output)
-#m = gen_sec_stu_matrix(prefs, 100, 1, 10, "test1")
+#m = gen_sec_stu_matrix(prefs, 1, 1, 1, "output")
 
 def break_up(output):
 	matrices = np.load(output + "/best_sec_sec.npy")

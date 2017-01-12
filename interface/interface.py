@@ -602,6 +602,12 @@ def openaddselect(): #Schedule
 		
 		# byClass add student to specific section of class
 		if current_section != "any":
+			cur.execute('''SELECT A.SectionID FROM Sections A INNER JOIN 
+				Classes B ON A.ClassID = B.ClassID 
+				WHERE B.ShortName = ? and A.Name = ?
+				''', (current_class,current_section))
+			sec = cur.fetchone()[0]
+			
 			global mat_yes
 			global mat_no
 			stuID = student_index[stu]
@@ -657,30 +663,37 @@ def openaddselect(): #Schedule
 			current_section = "any"
 		else:
 			current_section = current[1]
-			
-			
-			cla = cur.execute('SELECT ClassID FROM Classes WHERE ShortName = ?',(current_class,))
-			cla = cur.fetchone()[0]
-			sec1 = cur.execute('SELECT SectionID FROM Sections WHERE ClassID = ? and Name = ?', (cla, current_section))
-			global sec
-			sec = cur.fetchone()[0]
+		
+		
 		stu = current_student.split(":")[0]
 		stu = int(stu)
 		
+		# byStudent add student to single section of class
 		if current_section != "any":
+			
+			# mats
 			global mat_yes
 			global mat_no
 			stuID = student_index[stu]
+			
+			
 			secID = section_index[sec] # what's sec from
 			mat_yes[stuID, secID] = 1
 			mat_no[stuID, secID] = 0
 			addPrefForClass(stu)
+			
+			# database
 			value = get_class_value(sec)
-			oldvalue = cur.execute('SELECT Scheduled FROM Students WHERE StudentID = ?',(stu, ) )
+			oldvalue = cur.execute('''SELECT Scheduled FROM Students 
+				WHERE StudentID = ?''',(stu, ) )
 			oldvalue = cur.fetchone()[0]
-			c = cur.execute('UPDATE Students SET Scheduled = ? WHERE StudentID = ?',(float(value) + float(oldvalue), stu) )
-			c = cur.execute('UPDATE Sections SET Scheduled = ? WHERE SectionID = ?' , (1, sec))
-			c = cur.execute('UPDATE Sections SET StudentID = ? WHERE SectionID = ?', (stu, sec)) # wonder why this doesn't work with an AND statement
+			c = cur.execute('''UPDATE Students SET Scheduled = ? 
+				WHERE StudentID = ?''',(float(value) + float(oldvalue), stu) )
+			c = cur.execute('''UPDATE Sections SET Scheduled = ? 
+				WHERE SectionID = ?''' , (1, sec))
+			c = cur.execute('''UPDATE Sections SET StudentID = ? 
+				WHERE SectionID = ?''', (stu, sec)) 
+			# wonder why this doesn't work with an AND statement
 			
 			
 			# Insert assigned sections in middle box
@@ -701,13 +714,18 @@ def openaddselect(): #Schedule
 			
 			conn.commit()
 		
-		
+		#byStudent add student to any section of class
 		if current_section == "any":
+			
+			# add in mats
 			addPrefForClass(stu)
 			global mat_yes
 			global mat_add
 			global mat_no
-			cur.execute('SELECT A.SectionID FROM Sections A INNER JOIN Classes B ON A.ClassID = B.ClassID WHERE B.ShortName = ?',(current_class,))
+			cur.execute('''SELECT A.SectionID FROM Sections A 
+				INNER JOIN Classes B 
+				ON A.ClassID = B.ClassID 
+				WHERE B.ShortName = ?''',(current_class,))
 			secs = fetchall()
 			global section_index
 			for sec in secs:
@@ -716,10 +734,13 @@ def openaddselect(): #Schedule
 				mat_add[stuID,secID] = 1
 				mat_no[stuID,secID] = 0
 			
+			# add in database
 			value = get_class_value(sec)
-			oldvalue = cur.execute('SELECT Scheduled FROM Students WHERE StudentID = ?',(stu, ) )
+			oldvalue = cur.execute('''SELECT Scheduled FROM Students 
+				WHERE StudentID = ?''',(stu, ) )
 			oldvalue = cur.fetchone()[0]
-			c = cur.execute('UPDATE Students SET Scheduled = ? WHERE StudentID = ?',(float(oldvalue) + float(value),  stu) )
+			c = cur.execute('''UPDATE Students SET Scheduled = ? 
+				WHERE StudentID = ?''',(float(oldvalue) + float(value),  stu) )
 			conn.commit()
 				
 		
@@ -741,54 +762,61 @@ def openremoveselect(): #Remove
 		cur = conn.cursor()
 		stu = cur.execute('SELECT StudentID FROM Students WHERE Name = ?',(current[0],))
 		stu = cur.fetchone()[0]
+		
+		# byClass remove student from single section
 		if current_section != "any":
+			cur.execute('''SELECT A.SectionID FROM Sections A INNER JOIN 
+				Classes B ON A.ClassID = B.ClassID 
+				WHERE B.ShortName = ? and A.Name = ?
+				''', (current_class,current_section))
+			sec = cur.fetchone()[0]
+			
+			
+			# mats
 			global mat_yes
 			global student_index
 			global section_index
 			stuID = student_index[stu]
 			secID = section_index[sec]
 			mat_yes[stuID, secID] = 0
+			
+			# remove from database
 			value = get_class_value(sec)
 			oldvalue = cur.execute('SELECT Scheduled FROM Students WHERE StudentID = ?',(stu, ) )
 			oldvalue = cur.fetchone()[0]
-			c = cur.execute('UPDATE Students SET Scheduled = ? WHERE StudentID = ?',(oldvalue - value, stu) )
-			c = cur.execute('Update Sections SET Scheduled = ? WHERE SectionID = ?' , (0, sec))
-			c = cur.execute('Update Sections SET StudentID = ? WHERE SectionID = ?' , (stu, sec))
-			
-			
+			cur.execute('''UPDATE Students SET Scheduled = ? 
+				WHERE StudentID = ?''',(oldvalue - value, stu) )
+			cur.execute('''Update Sections SET Scheduled = ? 
+				WHERE SectionID = ?''' , (0, sec))
+			cur.execute('''Update Sections SET StudentID = ? 
+				WHERE SectionID = ?''' , (stu, sec))
 			
 			conn.commit()
 		
 		# byClass remove student from any section
 		if current_section == "any":
-
-			secs = cur.execute('''SELECT A.SectionID FROM Classes B
-								  INNER JOIN Sections A 
-								  ON A.ClassID = B.ClassID
-								  WHERE B.ShortName = ?''', (current_class,))
-			secs = cur.fetchall()
-			for s in secs:
-				secID = section_index[s[0]]
-				cpref = mat_prefs[stuID,secID]
-				mat_prefs[stuID,secID] = int(cpref) + 500
 			
+			# remove scheduled from mats
 			global mat_yes
 			global mat_add
-			global mat_no
-			cur.execute('SELECT A.SectionID FROM Sections A INNER JOIN Classes B ON A.ClassID = B.ClassID WHERE B.ShortName = ?',(current_class,))
-			secs = fetchall()
+			cur.execute('''SELECT A.SectionID FROM Sections A 
+				INNER JOIN Classes B 
+				ON A.ClassID = B.ClassID 
+				WHERE B.ShortName = ?''',(current_class,))
+			secs = cur.fetchall()
 			global section_index
 			for sec in secs:
 				secID = section_index[sec]
 				mat_yes[stuID,secID] = 0
 				mat_add[stuID,secID] = 0
-				mat_no[stuID,secID] = 0
 			
-			
+			# remove scheduled from database
 			value = get_class_value(secs[0])
-			oldvalue = cur.execute('SELECT Scheduled FROM Students WHERE StudentID = ?',(stu, ) )
+			oldvalue = cur.execute('''SELECT Scheduled FROM Students 
+				WHERE StudentID = ?''',(stu, ) )
 			oldvalue = cur.fetchone()[0]
-			c = cur.execute('Update Students SET Scheduled = ? WHERE StudentID = ?',(float(oldvalue) - float(value), stu) )
+			c = cur.execute('''Update Students SET Scheduled = ? 
+				WHERE StudentID = ?''',(float(oldvalue) - float(value), stu) )
 			conn.commit()
 		
 		doViewClass()
@@ -806,17 +834,19 @@ def openremoveselect(): #Remove
 			current_section = "any"
 		else:
 			current_section = current[1]
-			
-			cla = cur.execute('SELECT ClassID FROM Classes WHERE ShortName = ?',(current_class,))
-			cla = cur.fetchone()[0]
-			sec1 = cur.execute('SELECT SectionID FROM Sections WHERE ClassID = ? and Name = ?', (cla, current_section))
-			global sec
-			sec = cur.fetchone()[0]
 		
 		stu = current_student.split(":")[0]
 		stu = int(stu)
 		
+		# byStudent remove student from single section of class
 		if current_section != "any":
+			cur.execute('''SELECT A.SectionID FROM Sections A INNER JOIN 
+				Classes B ON A.ClassID = B.ClassID 
+				WHERE B.ShortName = ? and A.Name = ?
+				''', (current_class,current_section))
+			sec = cur.fetchone()[0]
+			
+			# mats
 			global mat_yes
 			global mat_no
 			stuID = student_index[stu]
@@ -824,6 +854,8 @@ def openremoveselect(): #Remove
 			mat_yes[stuID, secID] = 1
 			mat_no[stuID, secID] = 0
 			addPrefForClass(stu)
+			
+			# remove from database
 			value = get_class_value(sec)
 			oldvalue = cur.execute('SELECT Scheduled FROM Students WHERE StudentID = ?',(stu, ) )
 			oldvalue = cur.fetchone()[0]
@@ -856,6 +888,7 @@ def openremoveselect(): #Remove
 			global current_class
 			removePrefForClass(stu)
 			
+			# mats
 			global mat_yes
 			global mat_add
 			global mat_no
@@ -868,6 +901,7 @@ def openremoveselect(): #Remove
 				mat_add[stuID,secID] = 1
 				mat_no[stuID,secID] = 0
 			
+			# remove from database
 			cur.execute('SELECT Worth FROM Classes WHERE ClassID = ?', (current_class,))
 			value = cur.fetchone()[0]
 			oldvalue = cur.execute('SELECT Scheduled FROM Students WHERE StudentID = ?',(stu, ) )
@@ -899,12 +933,14 @@ def openremoveselect(): #Remove
 		message = "Student Removed from Class!"
 		d.set(message)
 
+
+
 def openaddblockselect(): #Add Block
 	# block student from class
 	if scheduling == 'class':
 		current = openListbox.get(ANCHOR)
 		current = current.split("; ")[1]
-		current = current.split(" )")
+		current = current.split(" (")
 		conn = sqlite3.connect('/Users/katiedaisey/Desktop/tascheduling/try1.db')
 		cur = conn.cursor()
 		stu = cur.execute('SELECT StudentID FROM Students WHERE Name = ?',(current[0],))
@@ -912,7 +948,14 @@ def openaddblockselect(): #Add Block
 		global student_index
 		stuID = student_index[stu]
 		
-		if current != "any":
+		# byClass block student from single section of class
+		if current_section != "any":
+			cur.execute('''SELECT A.SectionID FROM Sections A INNER JOIN 
+				Classes B ON A.ClassID = B.ClassID 
+				WHERE B.ShortName = ? and A.Name = ?
+				''', (current_class,current_section))
+			sec = cur.fetchone()[0]
+			
 			global mat_yes
 			global mat_no
 			global section_index
@@ -921,7 +964,7 @@ def openaddblockselect(): #Add Block
 			mat_no[stuID, secID] = 1
 		
 		# byClass block of student from any section in class
-		if current == 'any':
+		if current_section == 'any':
 			removePrefForClass(stu)
 			
 			cur.execute('SELECT ClassID FROM Classes WHERE ShortName = ?', (current_class,))
@@ -935,7 +978,7 @@ def openaddblockselect(): #Add Block
 				mat_no[stuID,secID] = 1
 			
 			
-			conn.commit()
+		conn.commit()
 	
 	
 	# byStudent block from class
@@ -1001,11 +1044,32 @@ def openremoveblockselect(): #Remove Block
 		global student_index
 		stuID = student_index[stu]
 		
-		if current != 'any':
+		# byClass remove block from single section of class
+		if current_section != 'any':
+			cur.execute('''SELECT A.SectionID FROM Sections A 
+				INNER JOIN Classes B ON A.ClassID = B.ClassID 
+				WHERE B.ShortName = ? and A.Name = ?
+				''', (current_class,current_section))
+			sec = cur.fetchone()
 			global mat_no
 			global section_index
 			secID = section_index[sec]
 			mat_no[stuID, secID] = 0
+		
+		# byClass remove block from any section of class
+		if current_section == 'any':
+			addPrefForClass(stu)
+			
+			cur.execute('SELECT ClassID FROM Classes WHERE ShortName = ?', (current_class,))
+			ClassID = cur.fetchone()[0]
+			cur.execute('SELECT SectionID FROM Sections WHERE ClassID = ?'
+			, (ClassID,))
+			secs = cur.fetchall()
+			for sec in secs:
+				secID = section_index[sec]
+				mat_yes[stuID,secID] = 0
+				mat_no[stuID,secID] = 0
+		conn.commit()
 		
 	
 	if scheduling == 'student':

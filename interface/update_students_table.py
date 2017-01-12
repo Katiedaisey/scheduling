@@ -1,4 +1,4 @@
-def update_students_table():
+def update_students_table(d):
 # update student tables
 	import sqlite3
 	from datetime import datetime
@@ -23,7 +23,7 @@ def update_students_table():
 		return(cs)
 	
 	
-	conn = sqlite3.connect('/Users/katiedaisey/Desktop/tascheduling/try1.db')
+	conn = sqlite3.connect('data/ta_scheduling.db')
 	cur = conn.cursor()
 	
 	# Make some fresh tables using executescript()
@@ -86,11 +86,12 @@ def update_students_table():
 	''')
 	
 	
-	filename = 'students.tsv'
+	filename = 'data/students.tsv'
 	skiprow = 0
 	count = 0
 	for entry in open(filename):
-		
+		message = "Updating Student Number " + str(count + 1)
+		d.set(message)
 		if skiprow > 0:
 			# update student information
 			entry = entry.split('\t')
@@ -252,6 +253,8 @@ def update_students_table():
 	
 	
 	# Determine Time_Time Conflicts
+	message = "Tidying Up"
+	d.set(message)
 	days = ["M", "T", "W", "R", "F", "S", "N"]
 	for day in days:
 		times = cur.execute('''SELECT Start, End, TimeID FROM Times WHERE Day = ?''', (day, ) )

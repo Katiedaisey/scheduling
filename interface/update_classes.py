@@ -12,12 +12,15 @@
 
 # Clean up Entries
 class update_classes:
-	def __init__(self, term):
+	def __init__(self, term, d):
 		import csv
 		import urllib2
 		from bs4 import BeautifulSoup
 		self.filename = 'https://udapps.nss.udel.edu/CoursesSearch/search-results?term=' + term + '&search_type=A&course_sec=CHEM&session=All&course_title=&instr_name=&text_info=All&instrtn_mode=All&time_start_hh=&time_start_ampm=&credit=Any&keyword=&subj_area_code=&college='
-		self.outputname = 'listings.csv'
+		self.outputname = 'data/listings.csv'
+		
+		message = "Getting Classes"
+		d.set(message)
 		
 		self.records = []
 		#Read HTML file into memory
@@ -27,8 +30,8 @@ class update_classes:
 				try:
 					self.response = urllib2.urlopen(self.nextPage)
 					html = self.response.read()
-					self.nextPage = self.next_page(html)
-					self.my_parse(html)
+					self.nextPage = self.next_page(html, d)
+					self.my_parse(html, d)
 				except:
 					raise
 				finally:
@@ -86,11 +89,11 @@ class update_classes:
 		div = self.division(tds)
 		sk = self.skill(tds)
 		newtds = []
-		newtds = tds[0:2] + yr + div + sk + tds[2:]
+		newtds = tds[0:2] + [0.3] + yr + div + sk + tds[2:]
 		return(newtds)
 	
 	# clean up entries
-	def clean(self, tds):
+	def clean(self, tds, d):
 		for i in range(len(tds)):
 			elem = tds[i]
 			elem = elem.text.encode('utf-8')
@@ -105,14 +108,18 @@ class update_classes:
 		tds[0] = tds[0].strip()
 		tds[0] = tds[0].replace('\n','')
 		tds[4] = tds[4].replace('\n','')
-		indices = [0, 1, 4, 5, 7]
+		indices = [0, 1, 2, 4, 5, 6, 7]
 		tds = [tds[x] for x in indices]
 		tds = self.addYDStoRow(tds)
+		
+		message = "Cleaning Results"
+		d.set(message)
+		
 		return(tds)
 	
 	
 	# Check for next page
-	def next_page(self, html):
+	def next_page(self, html, d):
 		from bs4 import BeautifulSoup
 		soup = BeautifulSoup(html, "lxml")
 		divs = soup.find_all('div')
@@ -127,11 +134,14 @@ class update_classes:
 					continue
 		if nextPage != 'None':
 			nextPage = 'https://udapps.nss.udel.edu/CoursesSearch/' + nextPage
+			
+		message = "Grabbing Next Page"
+		d.set(message)
 		return(nextPage)
 		
 	
 	#Grab table from HTML
-	def my_parse(self, html):
+	def my_parse(self, html, d):
 		from bs4 import BeautifulSoup
 		soup = BeautifulSoup(html, "lxml")
 		table = soup.find_all('table')[0]
@@ -140,13 +150,13 @@ class update_classes:
 			coursetype = tr.find_all('span')
 			coursetype = coursetype[0].string
 			if coursetype == 'LAB' or coursetype == 'DIS':
-				tds = self.clean(tds)
+				tds = self.clean(tds, d)
 				self.records.append(tds)
 	
 
-def deleteExtraRecords():
+def deleteExtraRecords(d):
 	import csv
-	filename = 'listings.csv'
+	filename = 'data/listings.csv'
 	shortname = []
 	records = []
 	for entry in open(filename):
@@ -155,6 +165,8 @@ def deleteExtraRecords():
 		if first not in shortname:
 			shortname.append(first)
 			records.append(entry)
+	message = "Tidying Up"
+	d.set(message)
 	with open(filename, 'wb') as f:
 		for row in records:
 			f.write(row)

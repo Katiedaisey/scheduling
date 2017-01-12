@@ -14,14 +14,14 @@ def get_student_worth(stu):
 	return(worth)
 
 def set_student_worth(stu, sec):
-	conn = sqlite3.connect('/Users/katiedaisey/Desktop/tascheduling/try1.db')
+	conn = sqlite3.connect('data/ta_scheduling.db')
 	cur = conn.cursor()
 	stu_worth = cur.execute('SELECT Scheduled FROM Students')
 	stu_worth = cur.fetchall()
 	stu_worth[stu] = stu_worth[stu] + sec_worth[sec]
 
 def get_section_worth(sec):
-	conn = sqlite3.connect('/Users/katiedaisey/Desktop/tascheduling/try1.db')
+	conn = sqlite3.connect('data/ta_scheduling.db')
 	cur = conn.cursor()
 	sections = cur.execute('SELECT DISTINCT SectionID FROM Sections')
 	sections = cur.fetchall()
@@ -69,7 +69,7 @@ def get_require2(output):
 
 def gen_sec_matrix(pop, keep, output):
 	
-	conn = sqlite3.connect('/Users/katiedaisey/Desktop/tascheduling/try1.db')
+	conn = sqlite3.connect('data/ta_scheduling.db')
 	cur = conn.cursor()
 	sections = cur.execute('SELECT DISTINCT SectionID FROM Sections')
 	sections = cur.fetchall()
@@ -82,7 +82,7 @@ def gen_sec_matrix(pop, keep, output):
 	np.fill_diagonal(mat_base, 1)
 	mat_base.flags.writeable = True
 	
-	sec_prefs = np.genfromtxt('section_section_matrix.csv', delimiter=',')
+	sec_prefs = np.genfromtxt('data/section_section_matrix.csv', delimiter=',')
 	#stu_sec_prefs = np.genfromtxt('student_preferences.csv', delimiter = ',')
 	
 	
@@ -314,7 +314,7 @@ def gen_sec_matrix(pop, keep, output):
 # generate set of sec_stu matrices
 def gen_sec_stu_matrix(mat_prefs, pop, keep, mats, output):
 	
-	conn = sqlite3.connect('/Users/katiedaisey/Desktop/tascheduling/try1.db')
+	conn = sqlite3.connect('data/ta_scheduling.db')
 	cur = conn.cursor()
 	sections = cur.execute('SELECT DISTINCT SectionID FROM Sections')
 	sections = cur.fetchall()
@@ -328,7 +328,7 @@ def gen_sec_stu_matrix(mat_prefs, pop, keep, mats, output):
 	mat_base.flags.writeable = True
 	
 	
-	sec_prefs = np.genfromtxt('section_section_matrix.csv', delimiter=',')
+	sec_prefs = np.genfromtxt('data/section_section_matrix.csv', delimiter=',')
 	stu_sec_prefs = mat_prefs
 	#stu_sec_prefs = np.genfromtxt('student_preferences.csv', delimiter = ',')
 	
@@ -365,7 +365,6 @@ def gen_sec_stu_matrix(mat_prefs, pop, keep, mats, output):
 				
 				# remove sections from list to be scheduled
 				cl = [i for i, x in enumerate(mat_base[count2,:]) if x==1]
-				print len(cl)
 				# scheduled via single section
 				if len(cl) > 0:
 					
@@ -471,7 +470,7 @@ def break_up2(output):
 #break_up2("output")
 
 def updateDatabase(schedule, output, mat_pref):
-	conn = sqlite3.connect('/Users/katiedaisey/Desktop/tascheduling/try1.db')
+	conn = sqlite3.connect('data/ta_scheduling.db')
 	cur = conn.cursor()
 	# reset student scheduled
 	cur.execute('UPDATE Students SET Scheduled = ?', (0,))

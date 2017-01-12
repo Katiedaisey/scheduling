@@ -3,7 +3,7 @@ def update_classes_table():
 	import sqlite3
 	from datetime import datetime
 	
-	conn = sqlite3.connect('/Users/katiedaisey/Desktop/tascheduling/try1.db')
+	conn = sqlite3.connect('data/ta_scheduling.db')
 	cur = conn.cursor()
 	
 	# Make some fresh tables using executescript()
@@ -44,6 +44,9 @@ def update_classes_table():
 		Name	TEXT NOT NULL,
 		ProfessorID	INTEGER NOT NULL,
 		ClassID	INTEGER NOT NULL,
+		NumberOpen	INTEGER,
+		Seats	INTEGER,
+		Room	TEXT,
 		StudentID INTEGER DEFAULT 0,
 		Scheduled INTEGER DEFAULT 0
 	);
@@ -129,31 +132,30 @@ def update_classes_table():
 		cur.execute('INSERT OR IGNORE INTO Skill (Name) VALUES(?)', (skills[i],))
 	
 	
-	# update from each row in listings.csv
+	# update from each row in data/listings.csv
 	# as created by update_classes.py
-	filename = 'listings.csv'
+	filename = 'data/listings.csv'
 	for entry in open(filename):
 		entry = entry.rstrip()
 		entry = entry.split(',')
-		
 		# create and get ProfessorID
-		if len(entry) == 9:
-			professor = entry[7] + ', ' + entry[8]
+		if len(entry) == 12:
+			professor = entry[10] + ', ' + entry[11]
 			professor = professor[1:-1]
 			cur.execute('''INSERT OR IGNORE INTO Professors (Name) VALUES(?)''', (professor,))
 			cur.execute('SELECT ProfessorID FROM Professors WHERE Name = ?', (professor, ))
 			ProfessorID = cur.fetchone()[0]
 			conn.commit()
 		
-		if len(entry) == 8:
-			if entry[7] != '\xc2\xa0':
-				professor = entry[7].strip()
+		if len(entry) == 11:
+			if entry[10] != '\xc2\xa0':
+				professor = entry[10].strip()
 				cur.execute('''INSERT OR IGNORE INTO Professors (Name) VALUES ( ? )''', (str(professor), ) )
 				cur.execute('SELECT ProfessorID FROM Professors WHERE Name = ?', (professor, ))
 				ProfessorID = cur.fetchone()[0]
 				conn.commit()
 			
-			if entry[7] == '\xc2\xa0':
+			if entry[10] == '\xc2\xa0':
 				professor = 'Staff'
 				cur.execute('''INSERT OR IGNORE INTO Professors (Name)
 	        	VALUES ( ? )''', (str(professor), ) )
@@ -162,7 +164,7 @@ def update_classes_table():
 				conn.commit()
 		
 		# create and get ClassID
-		if len(entry) > 8:
+		if len(entry) > 11:
 			classname = entry[1]
 			classother = entry[0]
 			shortname = classother[0:7]
@@ -185,40 +187,40 @@ def update_classes_table():
 			
 			
 			# get YDS
-			if entry[2] == 'any':
+			if entry[3] == 'any':
 				#for y in years[:-1]:
 				#	cur.execute('SELECT PrimaryKey FROM Year WHERE Name = ?',(y,))
 				#	YearID = cur.fetchone()[0]
 				cur.execute('UPDATE Classes SET YearID = ? WHERE ClassID = ?',(6, ClassID))
-				entry[2] = '12345'
-			if entry[2] != 'any':
-				for y in entry[2]:
+				entry[3] = '12345'
+			if entry[3] != 'any':
+				for y in entry[3]:
 					cur.execute('SELECT PrimaryKey FROM Year WHERE Name = ?',(y,))
 					YearID = cur.fetchone()[0]
 					cur.execute('UPDATE Classes SET YearID = ? WHERE ClassID = ?',(YearID, ClassID))
 			
-			if entry[3] == 'any':
+			if entry[4] == 'any':
 				#for y in divisions[:-1]:
 				#	print y
 				#	cur.execute('SELECT PrimaryKey FROM Division WHERE Name = ?',(y,))
 				#	DivisionID = cur.fetchone()[0]
 				cur.execute('UPDATE Classes SET DivisionID = ? WHERE ClassID = ?',(6, ClassID))
-				entry[3] = 'ABIOP'
-			if entry[3] != 'any':
-				for y in entry[3]:
+				entry[4] = 'ABIOP'
+			if entry[4] != 'any':
+				for y in entry[4]:
 					cur.execute('SELECT PrimaryKey FROM Division WHERE Name = ?',(y,))
 					DivisionID = cur.fetchone()[0]
 					cur.execute('UPDATE Classes SET DivisionID = ? WHERE ClassID = ?',(DivisionID, ClassID))
 			
 			
-			if entry[4] == 'any':
+			if entry[5] == 'any':
 				#for y in skills[:-1]:
 				#	cur.execute('SELECT PrimaryKey FROM Skill WHERE Name = ?',(y,))
 				#	SkillID = cur.fetchone()[0]
 				cur.execute('UPDATE Classes SET SkillID = ? WHERE ClassID = ?',(6, ClassID))
-				entry[4] = '12345'
-			if entry[4] != 'any':
-				for y in entry[4]:
+				entry[5] = '12345'
+			if entry[5] != 'any':
+				for y in entry[5]:
 					cur.execute('SELECT PrimaryKey FROM Skill WHERE Name = ?',(y,))
 					SkillID = cur.fetchone()[0]
 					cur.execute('UPDATE Classes SET SkillID = ? WHERE ClassID = ?',(SkillID, ClassID))
@@ -227,7 +229,7 @@ def update_classes_table():
 			
 			
 			
-			year = entry[2]
+			year = entry[3]
 			if '1' in year:
 				cur.execute('INSERT OR IGNORE INTO Sections_Year (SectionID, YearID) VALUES (?, ?)', (SectionID, 1))
 			elif '2' in year:
@@ -243,7 +245,7 @@ def update_classes_table():
 			
 			
 			
-			div = entry[3]
+			div = entry[4]
 			if 'A' in div:
 				cur.execute('INSERT OR IGNORE INTO Sections_Division (SectionID, DivisionID) VALUES (?, ?)', (SectionID, 1))
 			elif 'B' in div:
@@ -259,7 +261,7 @@ def update_classes_table():
 			
 			
 			
-			skill = entry[4]
+			skill = entry[5]
 			if '1' in skill:
 				cur.execute('INSERT OR IGNORE INTO Sections_Skill (SectionID, SkillID) VALUES (?, ?)', (SectionID, 1))
 			if '2' in skill:
@@ -278,8 +280,8 @@ def update_classes_table():
 			# create and get TimeID
 			# clean up time entry
 	
-			time = entry[6]
-			day = entry[5]
+			time = entry[8]
+			day = entry[7]
 			try:
 				end = time.split(' - ')[1].strip()
 				start = time.split(' - ')[0].strip()
@@ -303,9 +305,20 @@ def update_classes_table():
 			cur.execute('''INSERT OR IGNORE INTO Sections_Times (SectionID, TimeID) VALUES (?, ?)''', (SectionID, TimeID))
 			
 			
+			# create and get RoomID
+			room = entry[9]
 			
+			# add seats and students scheduled to section
+			seats = entry[6]
+			seats = seats.split(' ')
+			nostu = seats[0]
+			seats = seats[2]
+			cur.execute('''UPDATE Sections 
+				SET Room = ?, NumberOpen = ?, Seats = ?
+				WHERE SectionID = ?
+				''', (room, nostu, seats, SectionID))
 			
-			
+			# commit to database
 			conn.commit()
 	
 	

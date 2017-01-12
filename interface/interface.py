@@ -44,8 +44,10 @@ def doDownloadClasses():
 		return(inputDialog.value)
 	
 	a = onClick()
-	update_classes.update_classes(a)
-	update_classes.deleteExtraRecords()
+	update_classes.update_classes(a,d)
+	update_classes.deleteExtraRecords(d)
+	message = "Analyzing Sections... Please be patient"
+	d.set(message)
 	global matrix_sections
 	matrix_sections = matrices.matrix_sections()
 	message = "Classes for Term " + a + " Downloaded!"
@@ -63,7 +65,7 @@ def doUpdateClasses():
 
 
 def doUpdateClassWorth():
-	conn = sqlite3.connect('/Users/katiedaisey/Desktop/tascheduling/try1.db')
+	conn = sqlite3.connect('data/ta_scheduling.db')
 	cur = conn.cursor()
 	cur.execute('SELECT ShortName, Worth From Classes')
 	classes = cur.fetchall()
@@ -150,7 +152,7 @@ def doUpdateStudents():
 		
 	
 	onClick()
-	ust.update_students_table()
+	ust.update_students_table(d)
 	matrices.matrix_pref()
 	message = "Student Responses Updated!"
 	d.set(message)
@@ -159,7 +161,7 @@ def doUpdateStudents():
 
 # List Classes in popup box for google forms survey
 def doListClasses():
-	conn = sqlite3.connect('/Users/katiedaisey/Desktop/tascheduling/try1.db')
+	conn = sqlite3.connect('data/ta_scheduling.db')
 	cur = conn.cursor()
 	
 	classes = cur.execute('SELECT ShortName, Name FROM Classes')
@@ -199,7 +201,7 @@ def doListClasses():
 
 
 def doListProfessors():
-	conn = sqlite3.connect('/Users/katiedaisey/Desktop/tascheduling/try1.db')
+	conn = sqlite3.connect('data/ta_scheduling.db')
 	cur = conn.cursor()
 	
 	profs = cur.execute('SELECT Name FROM Professors')
@@ -259,7 +261,7 @@ def doByClass():
 	leftListbox.delete(0,END)
 	chosenListbox.delete(0,END)
 	openListbox.delete(0,END)
-	conn = sqlite3.connect('/Users/katiedaisey/Desktop/tascheduling/try1.db')
+	conn = sqlite3.connect('data/ta_scheduling.db')
 	cur = conn.cursor()
 	
 	classes = cur.execute('SELECT ShortName, Name FROM Classes')
@@ -274,7 +276,7 @@ def doByStudent():
 	leftListbox.delete(0,END)
 	chosenListbox.delete(0,END)
 	openListbox.delete(0,END)
-	conn = sqlite3.connect('/Users/katiedaisey/Desktop/tascheduling/try1.db')
+	conn = sqlite3.connect('data/ta_scheduling.db')
 	cur = conn.cursor()
 	
 	classes = cur.execute('SELECT StudentID, Name, Scheduled FROM Students')
@@ -288,9 +290,13 @@ def doByStudent():
 def doAutomateFast():
 	doSave(output2 = "output")
 	global mat_prefs
+	message = "Generating TA Lines"
+	d.set(message)
 	auto.gen_sec_matrix(pop = 100, keep = 10, output = output)
 	auto.break_up(output)
 	global mat_sch
+	message = "Matching TAs with Lines"
+	d.set(message)
 	mat_sch = auto.gen_sec_stu_matrix(mat_prefs = mat_prefs, pop = 1000, keep = 1, mats = 10, output = output)[0]
 	
 	
@@ -302,10 +308,14 @@ def doAutomateFast():
 
 def doAutomateBest():
 	doSave(output2 = "output")
-	auto.gen_sec_matrix(pop = 10000, keep = 100, output = output)
+	message = "Generating TA Lines"
+	d.set(message)
+	auto.gen_sec_matrix(pop = 1000, keep = 100, output = output)
 	auto.break_up(output)
 	global mat_sch
 	global mat_prefs
+	message = "Matching TAs with Lines"
+	d.set(message)
 	mat_sch = auto.gen_sec_stu_matrix(mat_prefs = mat_prefs, pop = 10000, keep = 1, mats = 100, output = output)[0]
 	auto.updateDatabase(mat_sch, output, mat_prefs)
 	message = "Schedule Created!"
@@ -318,7 +328,7 @@ def doViewClass():
 	current = leftListbox.get(ANCHOR)[0]
 	global current_class
 	current_class = current
-	conn = sqlite3.connect('/Users/katiedaisey/Desktop/tascheduling/try1.db')
+	conn = sqlite3.connect('data/ta_scheduling.db')
 	cur = conn.cursor()
 	
 	classes = cur.execute('''
@@ -364,7 +374,7 @@ def doViewClass():
 	return()
 
 def doViewStudent(student):
-	conn = sqlite3.connect('/Users/katiedaisey/Desktop/tascheduling/try1.db')
+	conn = sqlite3.connect('data/ta_scheduling.db')
 	cur = conn.cursor()
 	# immediate time conflicts
 	unavail = cur.execute('''SELECT D.Day, D.Start, D.End
@@ -426,7 +436,7 @@ def leftselect(): #Select
 		global current_class
 		current_class = current
 		chosenListbox.delete(0, END)
-		conn = sqlite3.connect('/Users/katiedaisey/Desktop/tascheduling/try1.db')
+		conn = sqlite3.connect('data/ta_scheduling.db')
 		cur = conn.cursor()
 		
 		classes = cur.execute('''
@@ -455,7 +465,7 @@ def leftselect(): #Select
 		current_student = current
 		stu = current.split(":")[0]
 		chosenListbox.delete(0, END)
-		conn = sqlite3.connect('/Users/katiedaisey/Desktop/tascheduling/try1.db')
+		conn = sqlite3.connect('data/ta_scheduling.db')
 		cur = conn.cursor()
 		
 		cur.execute('''SELECT B.SectionID, C.ShortName, B.Name
@@ -477,7 +487,7 @@ def leftselect(): #Select
 		# Insert classes in right box
 		# centerselect will select class to view sections
 		openListbox.delete(0,END)
-		conn = sqlite3.connect('/Users/katiedaisey/Desktop/tascheduling/try1.db')
+		conn = sqlite3.connect('data/ta_scheduling.db')
 		cur = conn.cursor()
 	
 		classes = cur.execute('SELECT ShortName, Name FROM Classes')
@@ -496,7 +506,7 @@ def centerselect(): #View
 	if scheduling == 'class':
 		current = chosenListbox.get(ANCHOR)
 		global current_section
-		conn = sqlite3.connect('/Users/katiedaisey/Desktop/tascheduling/try1.db')
+		conn = sqlite3.connect('data/ta_scheduling.db')
 		cur = conn.cursor()
 		if current == "any":
 			current_section = "any"
@@ -558,7 +568,7 @@ def centerselect(): #View
 		global current_class
 		current_class = current
 		openListbox.delete(0, END)
-		conn = sqlite3.connect('/Users/katiedaisey/Desktop/tascheduling/try1.db')
+		conn = sqlite3.connect('data/ta_scheduling.db')
 		cur = conn.cursor()
 		
 		classes = cur.execute('''
@@ -582,7 +592,7 @@ def centerselect(): #View
 
 
 def get_class_value(SectionID):
-	conn = sqlite3.connect('/Users/katiedaisey/Desktop/tascheduling/try1.db')
+	conn = sqlite3.connect('data/ta_scheduling.db')
 	cur = conn.cursor()
 	cla = cur.execute('''SELECT A.Worth from Classes A Inner Join Sections B ON A.ClassID = B.ClassID WHERE B.SectionID = ?''', (SectionID,))
 	cla = cur.fetchone()[0]
@@ -595,7 +605,7 @@ def openaddselect(): #Schedule
 		current = openListbox.get(ANCHOR)
 		current = current.split("; ")[1]
 		current = current.split(" (")
-		conn = sqlite3.connect('/Users/katiedaisey/Desktop/tascheduling/try1.db')
+		conn = sqlite3.connect('data/ta_scheduling.db')
 		cur = conn.cursor()
 		stu = cur.execute('SELECT StudentID FROM Students WHERE Name = ?',(current[0],))
 		stu = cur.fetchone()[0]
@@ -657,7 +667,7 @@ def openaddselect(): #Schedule
 	if scheduling == 'student':
 		current = openListbox.get(ANCHOR)
 		global current_section
-		conn = sqlite3.connect('/Users/katiedaisey/Desktop/tascheduling/try1.db')
+		conn = sqlite3.connect('data/ta_scheduling.db')
 		cur = conn.cursor()
 		if current == "any":
 			current_section = "any"
@@ -670,6 +680,11 @@ def openaddselect(): #Schedule
 		
 		# byStudent add student to single section of class
 		if current_section != "any":
+			cur.execute('''SELECT A.SectionID FROM Sections A INNER JOIN 
+				Classes B ON A.ClassID = B.ClassID 
+				WHERE B.ShortName = ? and A.Name = ?
+				''', (current_class,current_section))
+			sec = cur.fetchone()[0]
 			
 			# mats
 			global mat_yes
@@ -758,7 +773,7 @@ def openremoveselect(): #Remove
 		current = openListbox.get(ANCHOR)
 		current = current.split("; ")[1]
 		current = current.split(" (")
-		conn = sqlite3.connect('/Users/katiedaisey/Desktop/tascheduling/try1.db')
+		conn = sqlite3.connect('data/ta_scheduling.db')
 		cur = conn.cursor()
 		stu = cur.execute('SELECT StudentID FROM Students WHERE Name = ?',(current[0],))
 		stu = cur.fetchone()[0]
@@ -828,7 +843,7 @@ def openremoveselect(): #Remove
 	if scheduling == 'student':
 		current = openListbox.get(ANCHOR)
 		global current_section
-		conn = sqlite3.connect('/Users/katiedaisey/Desktop/tascheduling/try1.db')
+		conn = sqlite3.connect('data/ta_scheduling.db')
 		cur = conn.cursor()
 		if current == "any":
 			current_section = "any"
@@ -941,7 +956,7 @@ def openaddblockselect(): #Add Block
 		current = openListbox.get(ANCHOR)
 		current = current.split("; ")[1]
 		current = current.split(" (")
-		conn = sqlite3.connect('/Users/katiedaisey/Desktop/tascheduling/try1.db')
+		conn = sqlite3.connect('data/ta_scheduling.db')
 		cur = conn.cursor()
 		stu = cur.execute('SELECT StudentID FROM Students WHERE Name = ?',(current[0],))
 		stu = cur.fetchone()[0]
@@ -986,7 +1001,7 @@ def openaddblockselect(): #Add Block
 		current = openListbox.get(ANCHOR)
 		print current
 		global current_section
-		conn = sqlite3.connect('/Users/katiedaisey/Desktop/tascheduling/try1.db')
+		conn = sqlite3.connect('data/ta_scheduling.db')
 		cur = conn.cursor()
 		if current == "any":
 			current_section = "any"
@@ -1037,7 +1052,7 @@ def openremoveblockselect(): #Remove Block
 		current = openListbox.get(ANCHOR)
 		current = current.split("; ")[1]
 		current = current.split(" (")
-		conn = sqlite3.connect('/Users/katiedaisey/Desktop/tascheduling/try1.db')
+		conn = sqlite3.connect('data/ta_scheduling.db')
 		cur = conn.cursor()
 		stu = cur.execute('SELECT StudentID FROM Students WHERE Name = ?',(current[0],))
 		stu = cur.fetchone()[0]
@@ -1075,7 +1090,7 @@ def openremoveblockselect(): #Remove Block
 	if scheduling == 'student':
 		current = openListbox.get(ANCHOR)
 		global current_section
-		conn = sqlite3.connect('/Users/katiedaisey/Desktop/tascheduling/try1.db')
+		conn = sqlite3.connect('data/ta_scheduling.db')
 		cur = conn.cursor()
 		if current == "any":
 			current_section = "any"
@@ -1106,7 +1121,7 @@ def openremoveblockselect(): #Remove Block
 
 
 def addPrefForClass(student):
-	conn = sqlite3.connect('/Users/katiedaisey/Desktop/tascheduling/try1.db')
+	conn = sqlite3.connect('data/ta_scheduling.db')
 	cur = conn.cursor()
 	secs = cur.execute('''SELECT A.SectionID FROM Classes B
 		INNER JOIN Sections A 
@@ -1120,7 +1135,7 @@ def addPrefForClass(student):
 		mat_prefs[stuID,secID] = int(cpref) + 10000
 
 def removePrefForClass(student):
-	conn = sqlite3.connect('/Users/katiedaisey/Desktop/tascheduling/try1.db')
+	conn = sqlite3.connect('data/ta_scheduling.db')
 	cur = conn.cursor()
 	secs = cur.execute('''SELECT A.SectionID FROM Classes B
 		INNER JOIN Sections A 
@@ -1137,9 +1152,16 @@ def removePrefForClass(student):
 # File functions
 
 def doNewSchedule():
+	message = "Starting a New Schedule"
+	d.set(message)
 	# Data
 	global mat_prefs
-	mat_prefs = matrices.matrix_pref()
+	try:
+		# open from file
+		mat_prefs = np.genfromtext('data/student_preferences.csv')
+	except:
+		# generate if unable to open
+		mat_prefs = matrices.matrix_pref(d)
 	global section_index
 	section_index = matrices.section_index()
 	global student_index
@@ -1153,9 +1175,11 @@ def doNewSchedule():
 	global matrix_sections
 	try:
 		#matrix_sections = matrices.matrix_sections()
-		matrix_sections = np.genfromtxt('section_section_matrix.csv', delimiter=',')
+		matrix_sections = np.genfromtxt('data/section_section_matrix.csv', delimiter=',')
 	except:
 		try:
+			message = "Generating Missing Files"
+			d.set(message)
 			matrix_sections = matrices.matrix_sections()
 		except:
 			matrix_sections = np.zeros((100,100))
@@ -1175,7 +1199,7 @@ def doNewSchedule():
 	
 	
 	# update database
-	conn = sqlite3.connect('/Users/katiedaisey/Desktop/tascheduling/try1.db')
+	conn = sqlite3.connect('data/ta_scheduling.db')
 	cur = conn.cursor()
 	cur.execute('UPDATE Sections SET Scheduled = 0')
 	cur.execute('UPDATE Sections SET StudentID = 0')
@@ -1252,7 +1276,7 @@ def doSave(output2):
 	np.save(output2 + "/mat_no.npy", mat_no)
 	np.save(output2 + "/matrix_sections.npy", matrix_sections)
 	np.save(output2 + "/mat_prefs.npy", mat_prefs)
-	message = "Saved"
+	message = "Schedule Saved"
 	d.set(message)
 
 
@@ -1299,7 +1323,7 @@ def doSaveAs():
 	np.save(output + "/mat_no.npy", mat_no)
 	np.save(output + "/mat_prefs.npy", mat_prefs)
 	np.save(output + "/matrix_sections.npy", matrix_sections)
-	message = "Saved"
+	message = "Schedule Saved"
 	d.set(message)
 
 

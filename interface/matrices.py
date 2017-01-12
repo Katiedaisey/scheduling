@@ -6,7 +6,7 @@ def matrix_sections():
 	import sqlite3
 	import numpy as np
 	import csv
-	conn = sqlite3.connect('/Users/katiedaisey/Desktop/tascheduling/try1.db')
+	conn = sqlite3.connect('data/ta_scheduling.db')
 	cur = conn.cursor()
 	
 	# Section_Section conflicts and preferences
@@ -62,16 +62,16 @@ def matrix_sections():
 			mat_sections[i,j] = conflicts + pref + pref2
 	
 	#Writing CSV file
-	np.savetxt("section_section_matrix.csv", mat_sections, delimiter=",")
+	np.savetxt("data/section_section_matrix.csv", mat_sections, delimiter=",")
 	return(mat_sections)
  
 
 # Stu_Sec preferences
 # run with #UpdateStudent
-def matrix_pref():
+def matrix_pref(d):
 	import sqlite3
 	import numpy as np
-	conn = sqlite3.connect('/Users/katiedaisey/Desktop/tascheduling/try1.db')
+	conn = sqlite3.connect('data/ta_scheduling.db')
 	cur = conn.cursor()
 	
 	sections = cur.execute('SELECT DISTINCT SectionID FROM Sections')
@@ -82,7 +82,8 @@ def matrix_pref():
 	mat_prefs.flags.writeable = True
 	
 	for i in range(len(students)):
-		
+		message = "Getting Preferences for Student Number " + str(i + 1)
+		d.set(message)
 		for j in range(len(sections)):
 			# init values
 			conflict1 = 0
@@ -238,7 +239,7 @@ def matrix_pref():
 			#print conflict1, conflict2, conflict3, conflict4, pref1, pref2, pref3, pref4, prefyr, prefdiv, prefsk
 			mat_prefs[i,j] = conflict1 + conflict2 + conflict3 + conflict4 + pref1 + pref2 + pref3 + pref4 + prefyr + prefdiv + prefsk
 			
-	np.savetxt("student_preferences.csv", mat_prefs, delimiter=",")
+	np.savetxt("data/student_preferences.csv", mat_prefs, delimiter=",")
 	return(mat_prefs)
 
 
@@ -246,7 +247,7 @@ def matrix_pref():
 def section_index():
 	import sqlite3
 	import numpy as np
-	conn = sqlite3.connect('/Users/katiedaisey/Desktop/tascheduling/try1.db')
+	conn = sqlite3.connect('data/ta_scheduling.db')
 	cur = conn.cursor()
 	
 	# Section_Section conflicts and preferences
@@ -260,7 +261,7 @@ def section_index():
 def student_index():
 	import sqlite3
 	import numpy as np
-	conn = sqlite3.connect('/Users/katiedaisey/Desktop/tascheduling/try1.db')
+	conn = sqlite3.connect('data/ta_scheduling.db')
 	cur = conn.cursor()
 	
 	# Section_Section conflicts and preferences
@@ -275,7 +276,7 @@ def student_index():
 def matrix_schedule_manual():
 	import sqlite3
 	import numpy as np
-	conn = sqlite3.connect('/Users/katiedaisey/Desktop/tascheduling/try1.db')
+	conn = sqlite3.connect('data/ta_scheduling.db')
 	cur = conn.cursor()
 	sections = cur.execute('SELECT DISTINCT SectionID FROM Sections')
 	sections = cur.fetchall()
@@ -290,7 +291,7 @@ def matrix_schedule_manual():
 def all_possible(manual):
 	import sqlite3
 	import numpy as np
-	conn = sqlite3.connect('/Users/katiedaisey/Desktop/tascheduling/try1.db')
+	conn = sqlite3.connect('data/ta_scheduling.db')
 	cur = conn.cursor()
 	sections = cur.execute('SELECT DISTINCT SectionID FROM Sections')
 	sections = cur.fetchall()

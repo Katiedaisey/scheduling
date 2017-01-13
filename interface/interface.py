@@ -371,32 +371,13 @@ def doViewClass():
 		if len(cl[3]) > 1:
 			for c in cl[3]:
 				try:
-					infs = get_occupied_Class(classes = current, day = c, start = cl[4], end = cl[5])
-					if len(infs) > 1:
-						for inf in infs:
-							print multiclass[inf[0]]
-							m = multiclass[inf[0]]
-							if m is None:
-								multiclass[inf[0]] = [inf[1:]]
-							else:
-								multiclass[inf[0]] = multiclass[inf[0]] + inf[1:]
+					
 					block_in_Calendar(text = cl[2] + " (" + name + ")", open = cl[1], day =  c, start = cl[4], end = cl[5], calendarFrame = calendarFrame)
 				except:
 					info.append(cl[2] + ": " + name + " " + cl[4] + "-" + cl[5])
 		else:
 			try:
-				infs = get_occupied_Class(classes = current, day = cl[3], start = cl[4], end = cl[5])
-				if len(infs) > 1:
-					for inf in infs:
-						print inf[0]
-						try:
-							m = multiclass[inf[0]]
-							muliclass[inf[0]] = multiclass[inf[0]].append(inf[1:])
-						except:
-							multiclass[inf[0]] = [inf[1:]]
-						print 'no here'
-						
-				print 'here'
+				
 				block_in_Calendar(text = cl[2] + " (" + name + ")", open =  cl[1], day =  cl[3], start = cl[4], end = cl[5], calendarFrame = calendarFrame)
 			except:
 				continue

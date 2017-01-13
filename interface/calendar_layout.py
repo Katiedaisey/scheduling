@@ -65,6 +65,35 @@ def doCalendar(calendarFrame):
 	for i in range(8):
 		calendarFrame.columnconfigure(i, weight = 1)
 	
+def get_occupied_Class(classes, day, start, end):
+	import sqlite3
+	conn = sqlite3.connect('data/ta_scheduling.db')
+	cur = conn.cursor()
+	cur.execute('''SELECT D.TimeID, B.Name, A.Name,
+		D.Day, D.Start, D.End FROM 
+		Times D INNER JOIN Sections_Times E
+		ON D.TimeID = E.TimeID
+		INNER JOIN Sections B
+		ON E.SectionID = B.SectionID
+		INNER JOIN Classes C
+		ON B.ClassID = C.ClassID
+		INNER JOIN Students A
+		ON B.StudentID = A.StudentID
+		WHERE D.Day = ? AND D.Start = ? AND D.End = ?
+		AND C.ShortName = ?''', (day, start, end, classes))
+	secs = cur.fetchall()
+	info = []
+	if len(secs) > 0:
+		for sec in secs:
+			info.append(sec)
+			
+	
+	return(info)
+		
+#print get_occupied_Class(classes = 'CHEM101', day = 'F', start = '3:35PM', end = '6:35PM')	
+	
+	
+
 
 def get_col(day):
 	days = {"M":1, "T":2, "W":3, "R":4, "F":5, "S":6, "Su":7}

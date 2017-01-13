@@ -52,6 +52,33 @@ def doExportMail(output2):
 
 #doExportMail("output")
 
+def doExportSusan(output2):
+	import sqlite3
+	conn = sqlite3.connect('data/ta_scheduling.db')
+	cur = conn.cursor()
+	cur.execute('SELECT ClassID, ShortName FROM Classes')
+	classes = cur.fetchall()
+	
+	for cl in classes:
+		cur.execute('''SELECT B.Name, A.Name, A.ID
+					FROM Sections B INNER JOIN Students A
+					ON B.StudentID = A.StudentID
+					WHERE B.ClassID = ?''', (cl[0],))
+		secs = cur.fetchall()
+		allsecs = ""
+		for s in secs:
+			allsecs = allsecs + s[1] + " (" + s[0] + ")" + "\t"
+	
+	filename = output2 + "/classeslist.tsv"
+	with open(filename, 'wb') as f:
+		for row in classes:
+			f.write(row[1] + "\t" + allsecs)
+			f.write("\n")
+	f.close()
+	message = "Data Exported for Susan"
+	d.set(message)
+
+
 def doExportLinda(output2):
 	import sqlite3
 	conn = sqlite3.connect('data/ta_scheduling.db')

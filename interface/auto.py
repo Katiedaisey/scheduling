@@ -68,6 +68,10 @@ def get_require2(output):
 
 
 def gen_sec_matrix(pop, keep, output):
+	import sqlite3
+	import numpy as np
+	import random
+	import os
 	
 	conn = sqlite3.connect('data/ta_scheduling.db')
 	cur = conn.cursor()
@@ -313,6 +317,10 @@ def gen_sec_matrix(pop, keep, output):
 
 # generate set of sec_stu matrices
 def gen_sec_stu_matrix(mat_prefs, pop, keep, mats, output):
+	import sqlite3
+	import numpy as np
+	import random
+	import os
 	
 	conn = sqlite3.connect('data/ta_scheduling.db')
 	cur = conn.cursor()
@@ -326,6 +334,7 @@ def gen_sec_stu_matrix(mat_prefs, pop, keep, mats, output):
 	mat_base = np.zeros((len(sections), len(sections)))
 	np.fill_diagonal(mat_base, 1)
 	mat_base.flags.writeable = True
+	
 	
 	
 	sec_prefs = np.genfromtxt('data/section_section_matrix.csv', delimiter=',')
@@ -365,6 +374,7 @@ def gen_sec_stu_matrix(mat_prefs, pop, keep, mats, output):
 				
 				# remove sections from list to be scheduled
 				cl = [i for i, x in enumerate(mat_base[count2,:]) if x==1]
+				print count2,cl
 				# scheduled via single section
 				if len(cl) > 0:
 					
@@ -377,6 +387,7 @@ def gen_sec_stu_matrix(mat_prefs, pop, keep, mats, output):
 				# any section, via mat_add, pref for class
 				if len(cl) == 0:
 					cl = [i for i, x in enumerate(mat_add[count2,:]) if x==1]
+					print cl
 					cl = random.choice(cl)
 					mat_base[count2,:] = mat_sch[cl,:]
 					# get line containing classes student is scheduled for
@@ -438,6 +449,8 @@ def gen_sec_stu_matrix(mat_prefs, pop, keep, mats, output):
 #m = gen_sec_stu_matrix(prefs, 1, 1, 1, "output")
 
 def break_up(output):
+	import numpy as np
+	import os
 	matrices = np.load(output + "/best_sec_sec.npy")
 	
 	d = os.path.dirname(output + "/matrices/")
@@ -454,6 +467,8 @@ def break_up(output):
 #break_up("output")
 
 def break_up2(output):
+	import numpy as np
+	import os
 	matrices = np.load(output + "/best_stu_sec.npy")
 	
 	d = os.path.dirname(output + "/matrices2/")
@@ -470,6 +485,9 @@ def break_up2(output):
 #break_up2("output")
 
 def updateDatabase(schedule, output, mat_pref):
+	import sqlite3
+	import numpy as np
+	
 	conn = sqlite3.connect('data/ta_scheduling.db')
 	cur = conn.cursor()
 	# reset student scheduled
@@ -488,7 +506,7 @@ def updateDatabase(schedule, output, mat_pref):
 			cur.execute('UPDATE Sections SET Scheduled = ? WHERE SectionID = ?', (0, sch + 1))
 			cur.execute('UPDATE Sections Set StudentID = ? WHERE SectionID = ?', (0, sch + 1))
 	conn.commit()
-	import numpy as np
+	#import numpy as np
 	np.save(output + '/mat_prefs.npy', mat_pref)
 #schedule = np.load('output/mat_yes.npy')
 #m = updateDatabase(schedule)

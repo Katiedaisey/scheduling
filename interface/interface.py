@@ -6,6 +6,13 @@ import matrices
 import numpy as np
 import auto
 import export
+import random
+import datetime as datetime
+import urllib2
+from bs4 import BeautifulSoup
+import csv
+import sys
+
 
 
 # Menu and Frame Functions
@@ -153,7 +160,9 @@ def doUpdateStudents():
 	
 	onClick()
 	ust.update_students_table(d)
-	matrices.matrix_pref()
+	matrices.matrix_pref(d)
+	mat_prefs = np.genfromtxt('data/student_preferences.csv', delimiter = ',')
+	
 	message = "Student Responses Updated!"
 	d.set(message)
 
@@ -288,7 +297,7 @@ def doByStudent():
 		leftListbox.insert(END, item)
 
 def doAutomateFast():
-	doSave(output2 = "output")
+	doSave(output2 = output)
 	global mat_prefs
 	message = "Generating TA Lines"
 	d.set(message)
@@ -307,7 +316,7 @@ def doAutomateFast():
 	return()
 
 def doAutomateBest():
-	doSave(output2 = "output")
+	doSave(output2 = output)
 	message = "Generating TA Lines"
 	d.set(message)
 	auto.gen_sec_matrix(pop = 1000, keep = 100, output = output)
@@ -354,6 +363,7 @@ def doViewClass():
 		lines[ta[2]] = ta[1]
 	doCalendar(calendarFrame)
 	info = []
+	multiclass = dict()
 	for cl in classes:
 		name = "0"
 		if cl[1] == 1:
@@ -361,15 +371,38 @@ def doViewClass():
 		if len(cl[3]) > 1:
 			for c in cl[3]:
 				try:
+					infs = get_occupied_Class(classes = current, day = c, start = cl[4], end = cl[5])
+					if len(infs) > 1:
+						for inf in infs:
+							print multiclass[inf[0]]
+							m = multiclass[inf[0]]
+							if m is None:
+								multiclass[inf[0]] = [inf[1:]]
+							else:
+								multiclass[inf[0]] = multiclass[inf[0]] + inf[1:]
 					block_in_Calendar(text = cl[2] + " (" + name + ")", open = cl[1], day =  c, start = cl[4], end = cl[5], calendarFrame = calendarFrame)
 				except:
 					info.append(cl[2] + ": " + name + " " + cl[4] + "-" + cl[5])
 		else:
 			try:
+				infs = get_occupied_Class(classes = current, day = cl[3], start = cl[4], end = cl[5])
+				if len(infs) > 1:
+					for inf in infs:
+						print inf[0]
+						try:
+							m = multiclass[inf[0]]
+							muliclass[inf[0]] = multiclass[inf[0]].append(inf[1:])
+						except:
+							multiclass[inf[0]] = [inf[1:]]
+						print 'no here'
+						
+				print 'here'
 				block_in_Calendar(text = cl[2] + " (" + name + ")", open =  cl[1], day =  cl[3], start = cl[4], end = cl[5], calendarFrame = calendarFrame)
 			except:
 				continue
 				#info.append(cl[2] + ": " + name + " " + cl[4] + "-" + cl[5])
+	
+	
 	add_info_Calendar(text = info, calendarFrame = calendarFrame)
 	return()
 
@@ -604,11 +637,16 @@ def openaddselect(): #Schedule
 	if scheduling == 'class':
 		current = openListbox.get(ANCHOR)
 		current = current.split("; ")[1]
-		current = current.split(" (")
+		current = current.split(" (")[0]
+		
+		
+		
 		conn = sqlite3.connect('data/ta_scheduling.db')
 		cur = conn.cursor()
 		stu = cur.execute('SELECT StudentID FROM Students WHERE Name = ?',(current[0],))
 		stu = cur.fetchone()[0]
+		
+		
 		
 		# byClass add student to specific section of class
 		if current_section != "any":
@@ -692,8 +730,10 @@ def openaddselect(): #Schedule
 			stuID = student_index[stu]
 			
 			
+			
 			secID = section_index[sec] # what's sec from
 			mat_yes[stuID, secID] = 1
+			print np.sum(mat_yes, 1)
 			mat_no[stuID, secID] = 0
 			addPrefForClass(stu)
 			
@@ -1158,7 +1198,7 @@ def doNewSchedule():
 	global mat_prefs
 	try:
 		# open from file
-		mat_prefs = np.genfromtext('data/student_preferences.csv')
+		mat_prefs = np.genfromtxt('data/student_preferences.csv', delimiter = ',')
 	except:
 		# generate if unable to open
 		mat_prefs = matrices.matrix_pref(d)
@@ -1176,6 +1216,7 @@ def doNewSchedule():
 	try:
 		#matrix_sections = matrices.matrix_sections()
 		matrix_sections = np.genfromtxt('data/section_section_matrix.csv', delimiter=',')
+		
 	except:
 		try:
 			message = "Generating Missing Files"
@@ -1196,6 +1237,8 @@ def doNewSchedule():
 	global current_section
 	global sec
 	
+	
+	print mat_prefs.shape
 	
 	
 	# update database
@@ -1408,9 +1451,10 @@ filemenu.add_separator()
 filemenu.add_command(label = "Save Schedule", command = lambda : doSave(output))
 filemenu.add_command(label = "Save Schedule As", command = lambda : doSaveAs())
 filemenu.add_separator()
-filemenu.add_command(label = "Export Mailing", command = lambda: export.doExportMail(output2 = output))
-filemenu.add_command(label = "Export Linda", command = lambda: export.doExportLinda(output2 = output))
-filemenu.add_command(label = "Export All", command = lambda: export.doExportAll(output2 = output))
+filemenu.add_command(label = "Export Email", command = lambda: export.doExportMail(output2 = output, d = d))
+filemenu.add_command(label = "Export Susan", command = lambda: export.doExportSusan(output2 = output, d = d))
+filemenu.add_command(label = "Export Linda", command = lambda: export.doExportLinda(output2 = output, d = d))
+filemenu.add_command(label = "Export All", command = lambda: export.doExportAll(output2 = output, d = d))
 filemenu.add_separator()
 filemenu.add_command(label = "Exit", command = doQuit)
 
@@ -1423,7 +1467,7 @@ schmenu.add_command(label = "Automate (Best)", command = lambda : doAutomateFast
 
 ## Update Menu
 updatemenu.add_command(label = "Download Classes", command = lambda : doDownloadClasses())
-updatemenu.add_command(label = "Update Class Worth", command = lambda : doUpdateClassWorth())
+updatemenu.add_command(label = "Update Class Worths", command = lambda : doUpdateClassWorth())
 updatemenu.add_command(label = "Update Classes", command = lambda : doUpdateClasses())
 updatemenu.add_command(label = "Update Students", command = lambda: doUpdateStudents())
 

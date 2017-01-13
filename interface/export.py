@@ -1,6 +1,6 @@
 # Export Functions
 
-def doExportMail(output2):
+def doExportMail(output2, d):
 	import sqlite3
 	
 	conn = sqlite3.connect('data/ta_scheduling.db')
@@ -52,7 +52,34 @@ def doExportMail(output2):
 
 #doExportMail("output")
 
-def doExportLinda(output2):
+def doExportSusan(output2, d):
+	import sqlite3
+	conn = sqlite3.connect('data/ta_scheduling.db')
+	cur = conn.cursor()
+	cur.execute('SELECT ClassID, ShortName FROM Classes')
+	classes = cur.fetchall()
+	
+	for cl in classes:
+		cur.execute('''SELECT B.Name, A.Name, A.ID
+					FROM Sections B INNER JOIN Students A
+					ON B.StudentID = A.StudentID
+					WHERE B.ClassID = ?''', (cl[0],))
+		secs = cur.fetchall()
+		allsecs = ""
+		for s in secs:
+			allsecs = allsecs + s[1] + " (" + s[0] + ")" + "\t"
+	
+	filename = output2 + "/classeslist.tsv"
+	with open(filename, 'wb') as f:
+		for row in classes:
+			f.write(row[1] + "\t" + allsecs)
+			f.write("\n")
+	f.close()
+	message = "Data Exported for Susan"
+	d.set(message)
+
+
+def doExportLinda(output2, d):
 	import sqlite3
 	conn = sqlite3.connect('data/ta_scheduling.db')
 	cur = conn.cursor()
@@ -86,7 +113,7 @@ def doExportAll(output2, d):
 	conn = sqlite3.connect('data/ta_scheduling.db')
 	cur = conn.cursor()
 	cur.execute('''SELECT A.Name, A.Email, A.Scheduled, A.Year, A.Division,
-		A.Skill, B.Name, C.ShortName, C.Name, C.Worth, D.Name, E.Day, E.Time
+		A.Skill, B.Name, C.ShortName, C.Name, C.Worth, D.Name, E.Day, E.Time,
 		B.Room, B.NumberOpen, B.Seats 
 		FROM Students A INNER JOIN Sections B 
 		ON A.StudentID = B.StudentID

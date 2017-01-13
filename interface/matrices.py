@@ -5,7 +5,6 @@
 def matrix_sections():
 	import sqlite3
 	import numpy as np
-	import csv
 	conn = sqlite3.connect('data/ta_scheduling.db')
 	cur = conn.cursor()
 	
@@ -81,10 +80,15 @@ def matrix_pref(d):
 	mat_prefs = np.zeros((len(students), len(sections)))
 	mat_prefs.flags.writeable = True
 	
+	print mat_prefs.shape
+	
+	print len(sections)
+	
 	for i in range(len(students)):
 		message = "Getting Preferences for Student Number " + str(i + 1)
 		d.set(message)
 		for j in range(len(sections)):
+		
 			# init values
 			conflict1 = 0
 			conflict2 = 0
@@ -239,6 +243,9 @@ def matrix_pref(d):
 			#print conflict1, conflict2, conflict3, conflict4, pref1, pref2, pref3, pref4, prefyr, prefdiv, prefsk
 			mat_prefs[i,j] = conflict1 + conflict2 + conflict3 + conflict4 + pref1 + pref2 + pref3 + pref4 + prefyr + prefdiv + prefsk
 			
+			
+			print mat_prefs.shape
+	print mat_prefs.shape
 	np.savetxt("data/student_preferences.csv", mat_prefs, delimiter=",")
 	return(mat_prefs)
 

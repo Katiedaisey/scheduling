@@ -415,7 +415,6 @@ def doViewStudent(student):
 			ON E.TimeID = D.TimeID
 			WHERE A.StudentID = ?''', (student,))
 		sch_classes = cur.fetchall()
-		print sch_classes
 		for cl in sch_classes:
 			if len(cl[3]) > 1:
 				for c in cl[3]:
@@ -651,7 +650,7 @@ def openaddselect(): #Schedule
 			secs = fetchall()
 			global section_index
 			for sec in secs:
-				secID = section_index[sec]
+				secID = section_index[sec[0]]
 				mat_yes[stuID,secID] = 0
 				mat_add[stuID,secID] = 1
 				mat_no[stuID,secID] = 0
@@ -685,6 +684,8 @@ def openaddselect(): #Schedule
 		
 		stu = current_student.split(":")[0]
 		stu = int(stu)
+		global student_index
+		stuID = student_index[stu]
 		
 		# byStudent add student to single section of class
 		if current_section != "any":
@@ -697,13 +698,11 @@ def openaddselect(): #Schedule
 			# mats
 			global mat_yes
 			global mat_no
-			stuID = student_index[stu]
 			
 			
 			
 			secID = section_index[sec] # what's sec from
 			mat_yes[stuID, secID] = 1
-			print np.sum(mat_yes, 1)
 			mat_no[stuID, secID] = 0
 			addPrefForClass(stu)
 			
@@ -751,23 +750,24 @@ def openaddselect(): #Schedule
 				INNER JOIN Classes B 
 				ON A.ClassID = B.ClassID 
 				WHERE B.ShortName = ?''',(current_class,))
-			secs = fetchall()
+			secs = cur.fetchall()
 			global section_index
 			for sec in secs:
-				secID = section_index[sec]
+				secID = section_index[sec[0]]
 				mat_yes[stuID,secID] = 0
 				mat_add[stuID,secID] = 1
 				mat_no[stuID,secID] = 0
 			
 			# add in database
-			value = get_class_value(sec)
+			value = get_class_value(secs[0][0])
 			oldvalue = cur.execute('''SELECT Scheduled FROM Students 
 				WHERE StudentID = ?''',(stu, ) )
 			oldvalue = cur.fetchone()[0]
 			c = cur.execute('''UPDATE Students SET Scheduled = ? 
 				WHERE StudentID = ?''',(float(oldvalue) + float(value),  stu) )
 			conn.commit()
-				
+			chosenListbox.insert(END, 'any ' + current_class)
+		
 		
 		
 		
@@ -831,12 +831,12 @@ def openremoveselect(): #Remove
 			secs = cur.fetchall()
 			global section_index
 			for sec in secs:
-				secID = section_index[sec]
+				secID = section_index[sec[0]]
 				mat_yes[stuID,secID] = 0
 				mat_add[stuID,secID] = 0
 			
 			# remove scheduled from database
-			value = get_class_value(secs[0])
+			value = get_class_value(secs[0][0])
 			oldvalue = cur.execute('''SELECT Scheduled FROM Students 
 				WHERE StudentID = ?''',(stu, ) )
 			oldvalue = cur.fetchone()[0]
@@ -862,6 +862,8 @@ def openremoveselect(): #Remove
 		
 		stu = current_student.split(":")[0]
 		stu = int(stu)
+		global student_index
+		stuID = student_index[stu]
 		
 		# byStudent remove student from single section of class
 		if current_section != "any":
@@ -874,7 +876,7 @@ def openremoveselect(): #Remove
 			# mats
 			global mat_yes
 			global mat_no
-			stuID = student_index[stu]
+			global section_index
 			secID = section_index[sec] # what's sec from
 			mat_yes[stuID, secID] = 1
 			mat_no[stuID, secID] = 0
@@ -918,43 +920,32 @@ def openremoveselect(): #Remove
 			global mat_add
 			global mat_no
 			cur.execute('SELECT A.SectionID FROM Sections A INNER JOIN Classes B ON A.ClassID = B.ClassID WHERE B.ShortName = ?',(current_class,))
-			secs = fetchall()
+			secs = cur.fetchall()
 			global section_index
 			for sec in secs:
-				secID = section_index[sec]
+				secID = section_index[sec[0]]
 				mat_yes[stuID,secID] = 0
 				mat_add[stuID,secID] = 1
 				mat_no[stuID,secID] = 0
 			
 			# remove from database
-			cur.execute('SELECT Worth FROM Classes WHERE ClassID = ?', (current_class,))
-			value = cur.fetchone()[0]
+			value = get_class_value(secs[0][0])
 			oldvalue = cur.execute('SELECT Scheduled FROM Students WHERE StudentID = ?',(stu, ) )
 			oldvalue = cur.fetchone()[0]
 			c = cur.execute('UPDATE Students SET Scheduled = ? WHERE StudentID = ?',(float(oldvalue) - float(value),  stu) )
 			conn.commit()
+			
+			items = chosenListbox.get(0,END)
+			a = items.index('any ' + current_class)
+			chosenListbox.delete(a)
+			
+			
 		
 		
 		
 		
-		
-		# Insert assigned sections in middle box
-		#chosenListbox.insert(END, "any")
-		cur.execute('''SELECT B.SectionID, C.ShortName, B.Name
-			FROM Students A INNER JOIN Sections B
-			ON A.StudentID = B.StudentID
-			INNER JOIN Classes C
-			ON B.ClassID = C.ClassID
-			WHERE A.StudentID = ?''', (stu,))
-		classes = cur.fetchall()
 		
 		doViewStudent(stu)
-		
-		chosenListbox.delete(0, END)
-		for item in classes:
-			item = item[1] + " " + item[2]
-			chosenListbox.insert(END, item)
-		
 		message = "Student Removed from Class!"
 		d.set(message)
 
@@ -998,7 +989,7 @@ def openaddblockselect(): #Add Block
 			, (ClassID,))
 			secs = cur.fetchall()
 			for sec in secs:
-				secID = section_index[sec]
+				secID = section_index[sec[0]]
 				mat_yes[stuID,secID] = 0
 				mat_no[stuID,secID] = 1
 			
@@ -1009,14 +1000,12 @@ def openaddblockselect(): #Add Block
 	# byStudent block from class
 	if scheduling == 'student':
 		current = openListbox.get(ANCHOR)
-		print current
 		global current_section
 		conn = sqlite3.connect('data/ta_scheduling.db')
 		cur = conn.cursor()
 		if current == "any":
 			current_section = "any"
 		else:
-			print current
 			current_section = current[1]
 		
 		stu = current_student.split(":")[0]
@@ -1048,7 +1037,7 @@ def openaddblockselect(): #Add Block
 			, (cla,))
 			secs = cur.fetchall()
 			for sec in secs:
-				secID = section_index[sec]
+				secID = section_index[sec[0]]
 				mat_yes[stuID,secID] = 0
 				mat_no[stuID,secID] = 1
 			removePrefForClass(stu)
@@ -1091,7 +1080,7 @@ def openremoveblockselect(): #Remove Block
 			, (ClassID,))
 			secs = cur.fetchall()
 			for sec in secs:
-				secID = section_index[sec]
+				secID = section_index[sec[0]]
 				mat_yes[stuID,secID] = 0
 				mat_no[stuID,secID] = 0
 		conn.commit()
@@ -1121,7 +1110,7 @@ def openremoveblockselect(): #Remove Block
 			cla = cur.fetchone()[0]
 			cur.execute('SELECT SectionID FROM Sections WHERE ClassID = ? and Name = ?', (cla, current_section))
 			sec = cur.fetchone()[0]
-			secID = section_index[sec]
+			secID = section_index[sec[0]]
 			mat_yes[stuID,secID] = 0
 			mat_no[stuID,secID] = 0
 			
@@ -1162,16 +1151,19 @@ def removePrefForClass(student):
 # File functions
 
 def doNewSchedule():
+	import numpy as np
 	message = "Starting a New Schedule"
 	d.set(message)
 	# Data
 	global mat_prefs
 	try:
 		# open from file
-		mat_prefs = np.genfromtext('data/student_preferences.csv')
+		mat_prefs = np.genfromtxt('data/student_preferences.csv' , delimiter=",")
 	except:
 		# generate if unable to open
-		mat_prefs = matrices.matrix_pref(d)
+		message = "Generating Missing Files"
+		d.set(message)
+		#mat_prefs = matrices.matrix_pref(d)
 	global section_index
 	section_index = matrices.section_index()
 	global student_index

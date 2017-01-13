@@ -360,13 +360,13 @@ def gen_sec_stu_matrix(mat_prefs, pop, keep, mats, output):
 		for s in stu_worth:
 			# for rounding issues
 			if s[0] > 0: #scheduled at all - already has line
+				print count2
 				# count2 is student
 				# need to get sections student has
 				#mat_base[count2,:] = mat_sch[count2,:]
 				
 				# remove sections from list to be scheduled
 				cl = [i for i, x in enumerate(mat_base[count2,:]) if x==1]
-				print count2,cl
 				# scheduled via single section
 				if len(cl) > 0:
 					
@@ -379,7 +379,7 @@ def gen_sec_stu_matrix(mat_prefs, pop, keep, mats, output):
 				# any section, via mat_add, pref for class
 				if len(cl) == 0:
 					cl = [i for i, x in enumerate(mat_add[count2,:]) if x==1]
-					print cl
+					print count2, cl
 					cl = random.choice(cl)
 					mat_base[count2,:] = mat_sch[cl,:]
 					# get line containing classes student is scheduled for

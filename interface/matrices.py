@@ -5,7 +5,9 @@
 def matrix_sections():
 	import sqlite3
 	import numpy as np
-	conn = sqlite3.connect('data/ta_scheduling.db')
+	
+	import globalvars
+	conn = sqlite3.connect(globalvars.database_path)
 	cur = conn.cursor()
 	
 	# Section_Section conflicts and preferences
@@ -70,7 +72,8 @@ def matrix_sections():
 def matrix_pref(d):
 	import sqlite3
 	import numpy as np
-	conn = sqlite3.connect('data/ta_scheduling.db')
+	import globalvars
+	conn = sqlite3.connect(globalvars.database_path)
 	cur = conn.cursor()
 	
 	sections = cur.execute('SELECT DISTINCT SectionID FROM Sections')
@@ -80,9 +83,7 @@ def matrix_pref(d):
 	mat_prefs = np.zeros((len(students), len(sections)))
 	mat_prefs.flags.writeable = True
 	
-	print mat_prefs.shape
 	
-	print len(sections)
 	
 	for i in range(len(students)):
 		message = "Getting Preferences for Student Number " + str(i + 1)
@@ -244,8 +245,7 @@ def matrix_pref(d):
 			mat_prefs[i,j] = conflict1 + conflict2 + conflict3 + conflict4 + pref1 + pref2 + pref3 + pref4 + prefyr + prefdiv + prefsk
 			
 			
-			print mat_prefs.shape
-	print mat_prefs.shape
+	
 	np.savetxt("data/student_preferences.csv", mat_prefs, delimiter=",")
 	return(mat_prefs)
 
@@ -254,7 +254,9 @@ def matrix_pref(d):
 def section_index():
 	import sqlite3
 	import numpy as np
-	conn = sqlite3.connect('data/ta_scheduling.db')
+	import globalvars
+	
+	conn = sqlite3.connect(globalvars.database_path)
 	cur = conn.cursor()
 	
 	# Section_Section conflicts and preferences
@@ -268,7 +270,9 @@ def section_index():
 def student_index():
 	import sqlite3
 	import numpy as np
-	conn = sqlite3.connect('data/ta_scheduling.db')
+	import globalvars
+	
+	conn = sqlite3.connect(globalvars.database_path)
 	cur = conn.cursor()
 	
 	# Section_Section conflicts and preferences
@@ -283,7 +287,9 @@ def student_index():
 def matrix_schedule_manual():
 	import sqlite3
 	import numpy as np
-	conn = sqlite3.connect('data/ta_scheduling.db')
+	import globalvars
+	
+	conn = sqlite3.connect(globalvars.database_path)
 	cur = conn.cursor()
 	sections = cur.execute('SELECT DISTINCT SectionID FROM Sections')
 	sections = cur.fetchall()
@@ -298,7 +304,9 @@ def matrix_schedule_manual():
 def all_possible(manual):
 	import sqlite3
 	import numpy as np
-	conn = sqlite3.connect('data/ta_scheduling.db')
+	import globalvars
+	
+	conn = sqlite3.connect(globalvars.database_path)
 	cur = conn.cursor()
 	sections = cur.execute('SELECT DISTINCT SectionID FROM Sections')
 	sections = cur.fetchall()

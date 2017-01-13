@@ -1,3 +1,5 @@
 *.tsv
 listings.csv
 *.npy
+build/*.*
+dist/*.*

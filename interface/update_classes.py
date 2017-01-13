@@ -12,12 +12,12 @@
 
 # Clean up Entries
 class update_classes:
-	def __init__(self, term, d):
+	def __init__(self, term, outputname, d):
 		import csv
 		import urllib2
 		from bs4 import BeautifulSoup
 		self.filename = 'https://udapps.nss.udel.edu/CoursesSearch/search-results?term=' + term + '&search_type=A&course_sec=CHEM&session=All&course_title=&instr_name=&text_info=All&instrtn_mode=All&time_start_hh=&time_start_ampm=&credit=Any&keyword=&subj_area_code=&college='
-		self.outputname = 'data/listings.csv'
+		#self.outputname = 'data/listings.csv'
 		
 		message = "Getting Classes"
 		d.set(message)
@@ -41,7 +41,7 @@ class update_classes:
 						raise
 		
 		#Writing CSV file
-		with open(self.outputname, 'wb') as self.f:
+		with open(outputname, 'wb') as self.f:
 			self.writer = csv.writer(self.f, lineterminator = '\n')
 			self.writer.writerows(self.records)
 		
@@ -154,9 +154,9 @@ class update_classes:
 				self.records.append(tds)
 	
 
-def deleteExtraRecords(d):
+def deleteExtraRecords(filename, d):
 	import csv
-	filename = 'data/listings.csv'
+	#filename = 'data/listings.csv'
 	shortname = []
 	records = []
 	for entry in open(filename):

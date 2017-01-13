@@ -14,14 +14,18 @@ def get_student_worth(stu):
 	return(worth)
 
 def set_student_worth(stu, sec):
-	conn = sqlite3.connect('data/ta_scheduling.db')
+	import globalvars
+	
+	conn = sqlite3.connect(globalvars.database_path)
 	cur = conn.cursor()
 	stu_worth = cur.execute('SELECT Scheduled FROM Students')
 	stu_worth = cur.fetchall()
 	stu_worth[stu] = stu_worth[stu] + sec_worth[sec]
 
 def get_section_worth(sec):
-	conn = sqlite3.connect('data/ta_scheduling.db')
+	import globalvars
+	
+	conn = sqlite3.connect(globalvars.database_path)
 	cur = conn.cursor()
 	sections = cur.execute('SELECT DISTINCT SectionID FROM Sections')
 	sections = cur.fetchall()
@@ -72,8 +76,10 @@ def gen_sec_matrix(pop, keep, output):
 	import numpy as np
 	import random
 	import os
+	import globalvars
 	
-	conn = sqlite3.connect('data/ta_scheduling.db')
+	
+	conn = sqlite3.connect(globalvars.database_path)
 	cur = conn.cursor()
 	sections = cur.execute('SELECT DISTINCT SectionID FROM Sections')
 	sections = cur.fetchall()
@@ -321,8 +327,10 @@ def gen_sec_stu_matrix(mat_prefs, pop, keep, mats, output):
 	import numpy as np
 	import random
 	import os
+	import globalvars
 	
-	conn = sqlite3.connect('data/ta_scheduling.db')
+	
+	conn = sqlite3.connect(globalvars.database_path)
 	cur = conn.cursor()
 	sections = cur.execute('SELECT DISTINCT SectionID FROM Sections')
 	sections = cur.fetchall()
@@ -485,10 +493,12 @@ def break_up2(output):
 #break_up2("output")
 
 def updateDatabase(schedule, output, mat_pref):
+	import globalvars
 	import sqlite3
 	import numpy as np
 	
-	conn = sqlite3.connect('data/ta_scheduling.db')
+	
+	conn = sqlite3.connect(globalvars.database_path)
 	cur = conn.cursor()
 	# reset student scheduled
 	cur.execute('UPDATE Students SET Scheduled = ?', (0,))

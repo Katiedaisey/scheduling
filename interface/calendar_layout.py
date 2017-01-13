@@ -67,7 +67,9 @@ def doCalendar(calendarFrame):
 	
 def get_occupied_Class(classes, day, start, end):
 	import sqlite3
-	conn = sqlite3.connect('data/ta_scheduling.db')
+	import globalvars
+	
+	conn = sqlite3.connect(globalvars.database_path)
 	cur = conn.cursor()
 	cur.execute('''SELECT D.TimeID, B.Name, A.Name,
 		D.Day, D.Start, D.End FROM 

@@ -1,6 +1,6 @@
 # Export Functions
 
-def doExportMail(output2):
+def doExportMail(output2, d):
 	import sqlite3
 	
 	conn = sqlite3.connect('data/ta_scheduling.db')
@@ -52,7 +52,7 @@ def doExportMail(output2):
 
 #doExportMail("output")
 
-def doExportSusan(output2):
+def doExportSusan(output2, d):
 	import sqlite3
 	conn = sqlite3.connect('data/ta_scheduling.db')
 	cur = conn.cursor()
@@ -79,7 +79,7 @@ def doExportSusan(output2):
 	d.set(message)
 
 
-def doExportLinda(output2):
+def doExportLinda(output2, d):
 	import sqlite3
 	conn = sqlite3.connect('data/ta_scheduling.db')
 	cur = conn.cursor()
@@ -113,7 +113,7 @@ def doExportAll(output2, d):
 	conn = sqlite3.connect('data/ta_scheduling.db')
 	cur = conn.cursor()
 	cur.execute('''SELECT A.Name, A.Email, A.Scheduled, A.Year, A.Division,
-		A.Skill, B.Name, C.ShortName, C.Name, C.Worth, D.Name, E.Day, E.Time
+		A.Skill, B.Name, C.ShortName, C.Name, C.Worth, D.Name, E.Day, E.Time,
 		B.Room, B.NumberOpen, B.Seats 
 		FROM Students A INNER JOIN Sections B 
 		ON A.StudentID = B.StudentID

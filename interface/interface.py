@@ -6,6 +6,13 @@ import matrices
 import numpy as np
 import auto
 import export
+import random
+import datetime as datetime
+import urllib2
+from bs4 import BeautifulSoup
+import csv
+import sys
+
 
 
 # Menu and Frame Functions
@@ -154,6 +161,8 @@ def doUpdateStudents():
 	onClick()
 	ust.update_students_table(d)
 	matrices.matrix_pref(d)
+	mat_prefs = np.genfromtxt('data/student_preferences.csv', delimiter = ',')
+	
 	message = "Student Responses Updated!"
 	d.set(message)
 
@@ -1189,7 +1198,7 @@ def doNewSchedule():
 	global mat_prefs
 	try:
 		# open from file
-		mat_prefs = np.genfromtext('data/student_preferences.csv')
+		mat_prefs = np.genfromtxt('data/student_preferences.csv', delimiter = ',')
 	except:
 		# generate if unable to open
 		mat_prefs = matrices.matrix_pref(d)
@@ -1207,6 +1216,7 @@ def doNewSchedule():
 	try:
 		#matrix_sections = matrices.matrix_sections()
 		matrix_sections = np.genfromtxt('data/section_section_matrix.csv', delimiter=',')
+		
 	except:
 		try:
 			message = "Generating Missing Files"
@@ -1227,6 +1237,8 @@ def doNewSchedule():
 	global current_section
 	global sec
 	
+	
+	print mat_prefs.shape
 	
 	
 	# update database
@@ -1439,10 +1451,10 @@ filemenu.add_separator()
 filemenu.add_command(label = "Save Schedule", command = lambda : doSave(output))
 filemenu.add_command(label = "Save Schedule As", command = lambda : doSaveAs())
 filemenu.add_separator()
-filemenu.add_command(label = "Export Email", command = lambda: export.doExportMail(output2 = output))
-filemenu.add_command(label = "Export Susan", command = lambda: export.doExportSusan(output2 = output))
-filemenu.add_command(label = "Export Linda", command = lambda: export.doExportLinda(output2 = output))
-filemenu.add_command(label = "Export All", command = lambda: export.doExportAll(output2 = output))
+filemenu.add_command(label = "Export Email", command = lambda: export.doExportMail(output2 = output, d = d))
+filemenu.add_command(label = "Export Susan", command = lambda: export.doExportSusan(output2 = output, d = d))
+filemenu.add_command(label = "Export Linda", command = lambda: export.doExportLinda(output2 = output, d = d))
+filemenu.add_command(label = "Export All", command = lambda: export.doExportAll(output2 = output, d = d))
 filemenu.add_separator()
 filemenu.add_command(label = "Exit", command = doQuit)
 

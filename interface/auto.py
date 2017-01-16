@@ -1,3 +1,14 @@
+<<<<<<< HEAD
+=======
+
+
+
+
+
+
+
+
+>>>>>>> master
 def get_student_worth(stu):
 	worth = amount[stu]
 	return(worth)
@@ -6,7 +17,11 @@ def set_student_worth(stu, sec):
 	import sqlite3
 	import globalvars
 	
+<<<<<<< HEAD
 	conn = sqlite3.connect(globalvars.database_path)
+=======
+	conn = sqlite3.connect(globalvars.database_pat
+>>>>>>> master
 	cur = conn.cursor()
 	stu_worth = cur.execute('SELECT Scheduled FROM Students')
 	stu_worth = cur.fetchall()
@@ -16,7 +31,12 @@ def get_section_worth(sec):
 	import sqlite3
 	import globalvars
 	
+<<<<<<< HEAD
 	conn = sqlite3.connect(globalvars.database_path)
+=======
+	conn = sqlite3.connect(globalvars.database_pat
+	cur = conn.cursor()
+>>>>>>> master
 	sections = cur.execute('SELECT DISTINCT SectionID FROM Sections')
 	sections = cur.fetchall()
 	sec_worth = cur.execute('SELECT A.Worth FROM Classes A INNER JOIN Sections B ON A.ClassID = B.ClassID')
@@ -69,7 +89,12 @@ def gen_sec_matrix(pop, keep, output):
 	import random
 	import os
 	import globalvars
+<<<<<<< HEAD
 	conn = sqlite3.connect(globalvars.database_path)
+=======
+	
+	conn = sqlite3.connect(globalvars.database_pat
+>>>>>>> master
 	cur = conn.cursor()
 	sections = cur.execute('SELECT DISTINCT SectionID FROM Sections')
 	sections = cur.fetchall()
@@ -318,6 +343,10 @@ def gen_sec_stu_matrix(mat_prefs, pop, keep, mats, output):
 	import random
 	import os
 	import globalvars
+<<<<<<< HEAD
+=======
+	
+>>>>>>> master
 	conn = sqlite3.connect(globalvars.database_path)
 	cur = conn.cursor()
 	sections = cur.execute('SELECT DISTINCT SectionID FROM Sections')
@@ -381,6 +410,10 @@ def gen_sec_stu_matrix(mat_prefs, pop, keep, mats, output):
 				# any section, via mat_add, pref for class
 				if len(cl) == 0:
 					cl = [i for i, x in enumerate(mat_add[count2,:]) if x==1]
+<<<<<<< HEAD
+=======
+					print count2, cl
+>>>>>>> master
 					cl = random.choice(cl)
 					mat_base[count2,:] = mat_sch[cl,:]
 					# get line containing classes student is scheduled for
@@ -476,7 +509,12 @@ def updateDatabase(schedule, output, mat_pref):
 	import sqlite3
 	import numpy as np
 	import globalvars
+<<<<<<< HEAD
 	conn = sqlite3.connect(globalvars.database_path)
+=======
+	
+	conn = sqlite3.connect(globalvars.database_pat
+>>>>>>> master
 	cur = conn.cursor()
 	# reset student scheduled
 	cur.execute('UPDATE Students SET Scheduled = ?', (0,))

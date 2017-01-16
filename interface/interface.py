@@ -39,7 +39,11 @@ def doDownloadClasses():
 			self.myLabel.pack()
 			self.myEntryBox = Entry(top)
 			self.myEntryBox.pack()
+<<<<<<< HEAD
 			self.myLabel2 = Label(top, text='Enter Location to Save Classes: Documents/')
+=======
+			self.myLabel2 = Label(top, text='Enter Locantion to Save Classes: Documents/')
+>>>>>>> master
 			self.myLabel2.pack()
 			self.myEntryBox2 = Entry(top)
 			self.myEntryBox2.pack()
@@ -57,6 +61,7 @@ def doDownloadClasses():
 	
 	a = onClick()
 	import os
+<<<<<<< HEAD
 	docu_path = os.path.join(os.path.expanduser("~"), "Documents")
 	docu_path = docu_path + "/" + a[1]
 	update_classes.update_classes(a[0], docu_path,d)
@@ -66,6 +71,8 @@ def doDownloadClasses():
 	#matrix_sections = matrices.matrix_sections()
 	message = "Classes for Term " + a[0] + " Downloaded!"
 	d.set(message)
+=======
+>>>>>>> master
 	update_classes.deleteExtraRecords(d)
 	docu_path = os.path.join(os.path.expanduser("~"), "Documents")
 	message = "Analyzing Sections... Please be patient"
@@ -1544,6 +1551,7 @@ googlemenu.add_command(label = "List Professors", command = lambda : doListProfe
 # Run at startup
 #doNewSchedule()
 import os
+<<<<<<< HEAD
 try:
 	dir_path = os.path.join(os.environ['APPDATA'], 'TAScheduling')
 except KeyError:
@@ -1552,7 +1560,17 @@ if not os.path.exists(dir_path):
 	os.makedirs(dir_path)
 globalvars.database_path = os.path.join(dir_path, 'tascheduling.db')
 sqlite3.connect(globalvars.database_path)
+=======
+import errno
+>>>>>>> master
 
+def make_sure_path_exists(path):
+	try:
+		os.makedirs(path)
+	except OSError as exception:
+		if exception.errno != errno.EEXIST:
+			raise
+make_sure_path_exists('data/')
 
 import errno
 

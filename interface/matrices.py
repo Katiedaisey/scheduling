@@ -5,8 +5,13 @@
 def matrix_sections():
 	import sqlite3
 	import numpy as np
+<<<<<<< HEAD
 	
 	import globalvars
+=======
+	import globalvars
+	
+>>>>>>> master
 	conn = sqlite3.connect(globalvars.database_path)
 	cur = conn.cursor()
 	
@@ -73,6 +78,10 @@ def matrix_pref(d):
 	import sqlite3
 	import numpy as np
 	import globalvars
+<<<<<<< HEAD
+=======
+	
+>>>>>>> master
 	conn = sqlite3.connect(globalvars.database_path)
 	cur = conn.cursor()
 	

@@ -3,6 +3,10 @@ def update_classes_table(filename):
 	import sqlite3
 	from datetime import datetime
 	import globalvars
+<<<<<<< HEAD
+=======
+	
+>>>>>>> master
 	conn = sqlite3.connect(globalvars.database_path)
 	cur = conn.cursor()
 	

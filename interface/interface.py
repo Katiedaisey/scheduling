@@ -66,6 +66,18 @@ def doDownloadClasses():
 	#matrix_sections = matrices.matrix_sections()
 	message = "Classes for Term " + a[0] + " Downloaded!"
 	d.set(message)
+	update_classes.deleteExtraRecords(d)
+	docu_path = os.path.join(os.path.expanduser("~"), "Documents")
+	message = "Analyzing Sections... Please be patient"
+	docu_path = docu_path + "/" + a[1]
+	d.set(message)
+	
+	update_classes.update_classes(a[0], docu_path,d)
+	global matrix_sections
+	update_classes.deleteExtraRecords(docu_path, d)
+	matrix_sections = matrices.matrix_sections()
+	message = "Classes for Term " + a + " Downloaded!"
+	
 
 
 def doUpdateClasses():
@@ -1532,7 +1544,6 @@ googlemenu.add_command(label = "List Professors", command = lambda : doListProfe
 # Run at startup
 #doNewSchedule()
 import os
-<<<<<<< HEAD
 try:
 	dir_path = os.path.join(os.environ['APPDATA'], 'TAScheduling')
 except KeyError:
@@ -1541,7 +1552,8 @@ if not os.path.exists(dir_path):
 	os.makedirs(dir_path)
 globalvars.database_path = os.path.join(dir_path, 'tascheduling.db')
 sqlite3.connect(globalvars.database_path)
-=======
+
+
 import errno
 
 def make_sure_path_exists(path):
@@ -1551,9 +1563,6 @@ def make_sure_path_exists(path):
 		if exception.errno != errno.EEXIST:
 			raise
 make_sure_path_exists('data/')
-
-
->>>>>>> master
 
 
 root.mainloop()

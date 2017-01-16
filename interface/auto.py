@@ -1,5 +1,3 @@
-
-
 def get_student_worth(stu):
 	worth = amount[stu]
 	return(worth)
@@ -8,6 +6,10 @@ def set_student_worth(stu, sec):
 	import globalvars
 	
 	conn = sqlite3.connect(globalvars.database_path)
+	import sqlite3
+	import globalvars
+	
+	conn = sqlite3.connect(globalvars.database_pat
 	cur = conn.cursor()
 	stu_worth = cur.execute('SELECT Scheduled FROM Students')
 	stu_worth = cur.fetchall()
@@ -17,6 +19,10 @@ def get_section_worth(sec):
 	import globalvars
 	
 	conn = sqlite3.connect(globalvars.database_path)
+	import sqlite3
+	import globalvars
+	
+	conn = sqlite3.connect(globalvars.database_pat
 	cur = conn.cursor()
 	sections = cur.execute('SELECT DISTINCT SectionID FROM Sections')
 	sections = cur.fetchall()
@@ -30,6 +36,7 @@ def get_section_worth(sec):
 # currently by number of classes (ie > 1)
 # switch to student worth
 def get_require(output):
+	import numpy as np
 	mat_yes = np.load(output + "/mat_yes.npy")
 	#mat_no = np.load(output + "/mat_no.npy")
 	m = np.sum(mat_yes, axis = 1)
@@ -46,6 +53,7 @@ def get_require(output):
 
 
 def get_require2(output):
+	import numpy as np
 	mat_yes = np.load(output + "/mat_yes.npy")
 	#mat_no = np.load(output + "/mat_no.npy")
 	m = np.sum(mat_yes, axis = 1)
@@ -68,9 +76,6 @@ def gen_sec_matrix(pop, keep, output):
 	import random
 	import os
 	import globalvars
-	
-
-	
 	conn = sqlite3.connect(globalvars.database_path)
 	cur = conn.cursor()
 	sections = cur.execute('SELECT DISTINCT SectionID FROM Sections')
@@ -321,7 +326,6 @@ def gen_sec_stu_matrix(mat_prefs, pop, keep, mats, output):
 	import os
 	import globalvars
 	
-	
 	conn = sqlite3.connect(globalvars.database_path)
 	cur = conn.cursor()
 	sections = cur.execute('SELECT DISTINCT SectionID FROM Sections')
@@ -484,10 +488,8 @@ def updateDatabase(schedule, output, mat_pref):
 	import globalvars
 	import sqlite3
 	import numpy as np
-	
-	
+	import globalvars
 	conn = sqlite3.connect(globalvars.database_path)
-
 	cur = conn.cursor()
 	# reset student scheduled
 	cur.execute('UPDATE Students SET Scheduled = ?', (0,))

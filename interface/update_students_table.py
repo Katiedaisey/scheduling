@@ -2,6 +2,9 @@ def update_students_table(filename, d):
 # update student tables
 	import sqlite3
 	from datetime import datetime
+	import globalvars
+	
+	conn = sqlite3.connect(globalvars.database_path)
 	
 	
 	def split_names(entry):
@@ -211,8 +214,7 @@ def update_students_table(filename, d):
 						cur.execute('''INSERT OR IGNORE INTO Pref_Student_Class (StudentID, ClassID) VALUES (?,?)''', (StudentID, ClassID))
 					except:
 						continue
-			
-			
+
 			# student_class nonprefence
 			if len(entry[11]) > 0:
 				classes = entry[11].split(', ')

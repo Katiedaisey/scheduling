@@ -1,9 +1,10 @@
-def update_classes_table():
+def update_classes_table(filename):
 	
 	import sqlite3
 	from datetime import datetime
+	import globalvars
 	
-	conn = sqlite3.connect('data/ta_scheduling.db')
+	conn = sqlite3.connect(globalvars.database_path)
 	cur = conn.cursor()
 	
 	# Make some fresh tables using executescript()
@@ -134,7 +135,7 @@ def update_classes_table():
 	
 	# update from each row in data/listings.csv
 	# as created by update_classes.py
-	filename = 'data/listings.csv'
+	#filename = 'data/listings.csv'
 	for entry in open(filename):
 		entry = entry.rstrip()
 		entry = entry.split(',')

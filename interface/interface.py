@@ -12,6 +12,7 @@ import urllib2
 from bs4 import BeautifulSoup
 import csv
 import sys
+import globalvars
 
 
 
@@ -38,11 +39,15 @@ def doDownloadClasses():
 			self.myLabel.pack()
 			self.myEntryBox = Entry(top)
 			self.myEntryBox.pack()
+			self.myLabel2 = Label(top, text='Enter Locantion to Save Classes: Documents/')
+			self.myLabel2.pack()
+			self.myEntryBox2 = Entry(top)
+			self.myEntryBox2.pack()
 			self.mySubmitButton = Button(top, text='Update', command=lambda: self.send())
 			self.mySubmitButton.pack()
 			
 		def send(self):
-			self.value = self.myEntryBox.get()
+			self.value = [self.myEntryBox.get(), self.myEntryBox2.get()]
 			self.top.destroy()
 		
 	def onClick():
@@ -51,14 +56,19 @@ def doDownloadClasses():
 		return(inputDialog.value)
 	
 	a = onClick()
-	update_classes.update_classes(a,d)
+	import os
 	update_classes.deleteExtraRecords(d)
+	docu_path = os.path.join(os.path.expanduser("~"), "Documents")
 	message = "Analyzing Sections... Please be patient"
+	docu_path = docu_path + "/" + a[1]
 	d.set(message)
+	
+	update_classes.update_classes(a[0], docu_path,d)
 	global matrix_sections
+	update_classes.deleteExtraRecords(docu_path, d)
 	matrix_sections = matrices.matrix_sections()
 	message = "Classes for Term " + a + " Downloaded!"
-	d.set(message)
+	
 
 
 def doUpdateClasses():

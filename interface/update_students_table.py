@@ -1,7 +1,10 @@
-def update_students_table(d):
+def update_students_table(filename, d):
 # update student tables
 	import sqlite3
 	from datetime import datetime
+	import globalvars
+	
+	conn = sqlite3.connect(globalvars.database_path)
 	
 	
 	def split_names(entry):
@@ -206,9 +209,12 @@ def update_students_table(d):
 				for clas in classes:
 					clas = clas.split(' - ')
 					clas = clas[0]
-					cur.execute('SELECT ClassID FROM Classes WHERE ShortName = ?',  (clas,))
-					ClassID = cur.fetchone()[0]
-					cur.execute('''INSERT OR IGNORE INTO Pref_Student_Class (StudentID, ClassID) VALUES (?,?)''', (StudentID, ClassID))
+					try:
+						cur.execute('SELECT ClassID FROM Classes WHERE ShortName = ?',  (clas,))
+						ClassID = cur.fetchone()[0]
+						cur.execute('''INSERT OR IGNORE INTO Pref_Student_Class (StudentID, ClassID) VALUES (?,?)''', (StudentID, ClassID))
+					except:
+						continue
 			
 			# student_class nonprefence
 			if len(entry[11]) > 0:
@@ -216,9 +222,12 @@ def update_students_table(d):
 				for clas in classes:
 					clas = clas.split(' - ')
 					clas = clas[0]
-					cur.execute('SELECT ClassID FROM Classes WHERE ShortName = ?',  (clas,))
-					ClassID = cur.fetchone()[0]
-					cur.execute('''INSERT OR IGNORE INTO Con_Student_Class (StudentID, ClassID) VALUES (?,?)''', (StudentID, ClassID))
+					try:
+						cur.execute('SELECT ClassID FROM Classes WHERE ShortName = ?',  (clas,))
+						ClassID = cur.fetchone()[0]
+						cur.execute('''INSERT OR IGNORE INTO Con_Student_Class (StudentID, ClassID) VALUES (?,?)''', (StudentID, ClassID))
+					except:
+						continue
 			
 				
 			# student_prof preference

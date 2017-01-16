@@ -5,7 +5,9 @@
 def matrix_sections():
 	import sqlite3
 	import numpy as np
-	conn = sqlite3.connect('data/ta_scheduling.db')
+	import globalvars
+	
+	conn = sqlite3.connect(globalvars.database_path)
 	cur = conn.cursor()
 	
 	# Section_Section conflicts and preferences
@@ -70,7 +72,9 @@ def matrix_sections():
 def matrix_pref(d):
 	import sqlite3
 	import numpy as np
-	conn = sqlite3.connect('data/ta_scheduling.db')
+	import globalvars
+	
+	conn = sqlite3.connect(globalvars.database_path)
 	cur = conn.cursor()
 	
 	sections = cur.execute('SELECT DISTINCT SectionID FROM Sections')
@@ -88,6 +92,7 @@ def matrix_pref(d):
 		message = "Getting Preferences for Student Number " + str(i + 1)
 		d.set(message)
 		for j in range(len(sections)):
+		
 			# init values
 			conflict1 = 0
 			conflict2 = 0
@@ -253,7 +258,9 @@ def matrix_pref(d):
 def section_index():
 	import sqlite3
 	import numpy as np
-	conn = sqlite3.connect('data/ta_scheduling.db')
+	import globalvars
+	
+	conn = sqlite3.connect(globalvars.database_path)
 	cur = conn.cursor()
 	
 	# Section_Section conflicts and preferences
@@ -267,7 +274,9 @@ def section_index():
 def student_index():
 	import sqlite3
 	import numpy as np
-	conn = sqlite3.connect('data/ta_scheduling.db')
+	import globalvars
+	
+	conn = sqlite3.connect(globalvars.database_path)
 	cur = conn.cursor()
 	
 	# Section_Section conflicts and preferences
@@ -282,7 +291,9 @@ def student_index():
 def matrix_schedule_manual():
 	import sqlite3
 	import numpy as np
-	conn = sqlite3.connect('data/ta_scheduling.db')
+	import globalvars
+	
+	conn = sqlite3.connect(globalvars.database_path)
 	cur = conn.cursor()
 	sections = cur.execute('SELECT DISTINCT SectionID FROM Sections')
 	sections = cur.fetchall()
@@ -297,7 +308,9 @@ def matrix_schedule_manual():
 def all_possible(manual):
 	import sqlite3
 	import numpy as np
-	conn = sqlite3.connect('data/ta_scheduling.db')
+	import globalvars
+	
+	conn = sqlite3.connect(globalvars.database_path)
 	cur = conn.cursor()
 	sections = cur.execute('SELECT DISTINCT SectionID FROM Sections')
 	sections = cur.fetchall()

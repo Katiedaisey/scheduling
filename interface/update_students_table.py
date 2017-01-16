@@ -214,11 +214,7 @@ def update_students_table(filename, d):
 						cur.execute('''INSERT OR IGNORE INTO Pref_Student_Class (StudentID, ClassID) VALUES (?,?)''', (StudentID, ClassID))
 					except:
 						continue
-<<<<<<< HEAD
 
-=======
-			
->>>>>>> master
 			# student_class nonprefence
 			if len(entry[11]) > 0:
 				classes = entry[11].split(', ')

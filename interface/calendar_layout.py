@@ -66,11 +66,7 @@ def doCalendar(calendarFrame):
 		calendarFrame.columnconfigure(i, weight = 1)
 	
 def get_occupied_Class(classes, day, start, end):
-<<<<<<< HEAD
 	import sqlite3
-=======
- 	import sqlite3
->>>>>>> master
 	import globalvars
 	
 	conn = sqlite3.connect(globalvars.database_path)

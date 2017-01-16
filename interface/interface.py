@@ -1241,6 +1241,9 @@ def doNewSchedule():
 	global mat_prefs
 	try:
 		# open from file
+<<<<<<< HEAD
+		mat_prefs = np.genfromtxt('data/student_preferences.csv' , delimiter=",")
+=======
 		mat_prefs = np.genfromtxt('data/student_preferences.csv', delimiter = ',')
 >>>>>>> origin/master
 	except:
@@ -1529,6 +1532,7 @@ googlemenu.add_command(label = "List Professors", command = lambda : doListProfe
 # Run at startup
 #doNewSchedule()
 import os
+<<<<<<< HEAD
 try:
 	dir_path = os.path.join(os.environ['APPDATA'], 'TAScheduling')
 except KeyError:
@@ -1537,6 +1541,7 @@ if not os.path.exists(dir_path):
 	os.makedirs(dir_path)
 globalvars.database_path = os.path.join(dir_path, 'tascheduling.db')
 sqlite3.connect(globalvars.database_path)
+=======
 import errno
 
 def make_sure_path_exists(path):
@@ -1548,6 +1553,7 @@ def make_sure_path_exists(path):
 make_sure_path_exists('data/')
 
 
+>>>>>>> master
 
 
 root.mainloop()

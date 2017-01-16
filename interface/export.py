@@ -1,7 +1,6 @@
 # Export Functions
 
 def doExportMail(output2, d):
-def doExportMail(output2):
 	import sqlite3
 	import globalvars
 	

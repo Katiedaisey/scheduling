@@ -1,12 +1,3 @@
-import sqlite3
-import numpy as np
-import random
-import os
-
-
-
-
-
 
 
 def get_student_worth(stu):
@@ -78,6 +69,7 @@ def gen_sec_matrix(pop, keep, output):
 	import os
 	import globalvars
 	
+
 	
 	conn = sqlite3.connect(globalvars.database_path)
 	cur = conn.cursor()
@@ -359,6 +351,8 @@ def gen_sec_stu_matrix(mat_prefs, pop, keep, mats, output):
 	mat_base = np.copy(mat_yes)
 	mat_base.flags.writeable = True
 	
+	print np.sum(mat_yes, 0)
+	print np.sum(mat_yes, 1)
 	
 	
 	value = [None] * keep
@@ -374,6 +368,7 @@ def gen_sec_stu_matrix(mat_prefs, pop, keep, mats, output):
 		for s in stu_worth:
 			# for rounding issues
 			if s[0] > 0: #scheduled at all - already has line
+				print count2
 				# count2 is student
 				# need to get sections student has
 				#mat_base[count2,:] = mat_sch[count2,:]
@@ -392,6 +387,7 @@ def gen_sec_stu_matrix(mat_prefs, pop, keep, mats, output):
 				# any section, via mat_add, pref for class
 				if len(cl) == 0:
 					cl = [i for i, x in enumerate(mat_add[count2,:]) if x==1]
+					print count2, cl
 					cl = random.choice(cl)
 					mat_base[count2,:] = mat_sch[cl,:]
 					# get line containing classes student is scheduled for
@@ -453,8 +449,6 @@ def gen_sec_stu_matrix(mat_prefs, pop, keep, mats, output):
 #m = gen_sec_stu_matrix(prefs, 1, 1, 1, "output")
 
 def break_up(output):
-	import numpy as np
-	import os
 	matrices = np.load(output + "/best_sec_sec.npy")
 	
 	d = os.path.dirname(output + "/matrices/")
@@ -471,8 +465,6 @@ def break_up(output):
 #break_up("output")
 
 def break_up2(output):
-	import numpy as np
-	import os
 	matrices = np.load(output + "/best_stu_sec.npy")
 	
 	d = os.path.dirname(output + "/matrices2/")
@@ -495,6 +487,7 @@ def updateDatabase(schedule, output, mat_pref):
 	
 	
 	conn = sqlite3.connect(globalvars.database_path)
+
 	cur = conn.cursor()
 	# reset student scheduled
 	cur.execute('UPDATE Students SET Scheduled = ?', (0,))
@@ -512,6 +505,7 @@ def updateDatabase(schedule, output, mat_pref):
 			cur.execute('UPDATE Sections SET Scheduled = ? WHERE SectionID = ?', (0, sch + 1))
 			cur.execute('UPDATE Sections Set StudentID = ? WHERE SectionID = ?', (0, sch + 1))
 	conn.commit()
+	import numpy as np
 	#import numpy as np
 	np.save(output + '/mat_prefs.npy', mat_pref)
 #schedule = np.load('output/mat_yes.npy')

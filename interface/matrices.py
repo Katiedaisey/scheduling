@@ -5,7 +5,6 @@
 def matrix_sections():
 	import sqlite3
 	import numpy as np
-	import csv
 	conn = sqlite3.connect('data/ta_scheduling.db')
 	cur = conn.cursor()
 	

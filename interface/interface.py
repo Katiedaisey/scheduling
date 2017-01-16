@@ -6,6 +6,13 @@ import matrices
 import numpy as np
 import auto
 import export
+import random
+import datetime as datetime
+import urllib2
+from bs4 import BeautifulSoup
+import csv
+import sys
+
 
 
 # Menu and Frame Functions
@@ -154,6 +161,8 @@ def doUpdateStudents():
 	onClick()
 	ust.update_students_table(d)
 	matrices.matrix_pref(d)
+	mat_prefs = np.genfromtxt('data/student_preferences.csv', delimiter = ',')
+	
 	message = "Student Responses Updated!"
 	d.set(message)
 
@@ -362,11 +371,13 @@ def doViewClass():
 		if len(cl[3]) > 1:
 			for c in cl[3]:
 				try:
+					
 					block_in_Calendar(text = cl[2] + " (" + name + ")", open = cl[1], day =  c, start = cl[4], end = cl[5], calendarFrame = calendarFrame)
 				except:
 					info.append(cl[2] + ": " + name + " " + cl[4] + "-" + cl[5])
 		else:
 			try:
+				
 				block_in_Calendar(text = cl[2] + " (" + name + ")", open =  cl[1], day =  cl[3], start = cl[4], end = cl[5], calendarFrame = calendarFrame)
 			except:
 				continue
@@ -1158,7 +1169,11 @@ def doNewSchedule():
 	global mat_prefs
 	try:
 		# open from file
+<<<<<<< HEAD
 		mat_prefs = np.genfromtxt('data/student_preferences.csv' , delimiter=",")
+=======
+		mat_prefs = np.genfromtxt('data/student_preferences.csv', delimiter = ',')
+>>>>>>> origin/master
 	except:
 		# generate if unable to open
 		message = "Generating Missing Files"
@@ -1178,6 +1193,7 @@ def doNewSchedule():
 	try:
 		#matrix_sections = matrices.matrix_sections()
 		matrix_sections = np.genfromtxt('data/section_section_matrix.csv', delimiter=',')
+		
 	except:
 		try:
 			message = "Generating Missing Files"
@@ -1198,6 +1214,8 @@ def doNewSchedule():
 	global current_section
 	global sec
 	
+	
+	print mat_prefs.shape
 	
 	
 	# update database
@@ -1410,10 +1428,10 @@ filemenu.add_separator()
 filemenu.add_command(label = "Save Schedule", command = lambda : doSave(output))
 filemenu.add_command(label = "Save Schedule As", command = lambda : doSaveAs())
 filemenu.add_separator()
-filemenu.add_command(label = "Export Email", command = lambda: export.doExportMail(output2 = output))
-filemenu.add_command(label = "Export Susan", command = lambda: export.doExportSusan(output2 = output))
-filemenu.add_command(label = "Export Linda", command = lambda: export.doExportLinda(output2 = output))
-filemenu.add_command(label = "Export All", command = lambda: export.doExportAll(output2 = output))
+filemenu.add_command(label = "Export Email", command = lambda: export.doExportMail(output2 = output, d = d))
+filemenu.add_command(label = "Export Susan", command = lambda: export.doExportSusan(output2 = output, d = d))
+filemenu.add_command(label = "Export Linda", command = lambda: export.doExportLinda(output2 = output, d = d))
+filemenu.add_command(label = "Export All", command = lambda: export.doExportAll(output2 = output, d = d))
 filemenu.add_separator()
 filemenu.add_command(label = "Exit", command = doQuit)
 

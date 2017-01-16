@@ -492,6 +492,7 @@ def updateDatabase(schedule, output, mat_pref):
 			cur.execute('UPDATE Sections Set StudentID = ? WHERE SectionID = ?', (0, sch + 1))
 	conn.commit()
 	import numpy as np
+	#import numpy as np
 	np.save(output + '/mat_prefs.npy', mat_pref)
 #schedule = np.load('output/mat_yes.npy')
 #m = updateDatabase(schedule)

@@ -3,27 +3,20 @@ def get_student_worth(stu):
 	return(worth)
 
 def set_student_worth(stu, sec):
-	import globalvars
-	
-	conn = sqlite3.connect(globalvars.database_path)
 	import sqlite3
 	import globalvars
 	
-	conn = sqlite3.connect(globalvars.database_pat
+	conn = sqlite3.connect(globalvars.database_path)
 	cur = conn.cursor()
 	stu_worth = cur.execute('SELECT Scheduled FROM Students')
 	stu_worth = cur.fetchall()
 	stu_worth[stu] = stu_worth[stu] + sec_worth[sec]
 
 def get_section_worth(sec):
-	import globalvars
-	
-	conn = sqlite3.connect(globalvars.database_path)
 	import sqlite3
 	import globalvars
 	
-	conn = sqlite3.connect(globalvars.database_pat
-	cur = conn.cursor()
+	conn = sqlite3.connect(globalvars.database_path)
 	sections = cur.execute('SELECT DISTINCT SectionID FROM Sections')
 	sections = cur.fetchall()
 	sec_worth = cur.execute('SELECT A.Worth FROM Classes A INNER JOIN Sections B ON A.ClassID = B.ClassID')
@@ -325,7 +318,6 @@ def gen_sec_stu_matrix(mat_prefs, pop, keep, mats, output):
 	import random
 	import os
 	import globalvars
-	
 	conn = sqlite3.connect(globalvars.database_path)
 	cur = conn.cursor()
 	sections = cur.execute('SELECT DISTINCT SectionID FROM Sections')
@@ -355,8 +347,6 @@ def gen_sec_stu_matrix(mat_prefs, pop, keep, mats, output):
 	mat_base = np.copy(mat_yes)
 	mat_base.flags.writeable = True
 	
-	print np.sum(mat_yes, 0)
-	print np.sum(mat_yes, 1)
 	
 	
 	value = [None] * keep
@@ -391,7 +381,6 @@ def gen_sec_stu_matrix(mat_prefs, pop, keep, mats, output):
 				# any section, via mat_add, pref for class
 				if len(cl) == 0:
 					cl = [i for i, x in enumerate(mat_add[count2,:]) if x==1]
-					print count2, cl
 					cl = random.choice(cl)
 					mat_base[count2,:] = mat_sch[cl,:]
 					# get line containing classes student is scheduled for
@@ -400,8 +389,6 @@ def gen_sec_stu_matrix(mat_prefs, pop, keep, mats, output):
 				cl = [i for i, x in enumerate(mat_base[count2,:]) if x==1]
 				for c in cl:
 					base_sec.remove(c)
-				
-			count2 = count2 + 1
 		
 		for p in range(pop):
 			# get copy of matrix with already scheduled tas

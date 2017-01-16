@@ -120,6 +120,7 @@ def doExportAll(output2, d):
 	conn = sqlite3.connect(globalvars.database_path)
 	cur = conn.cursor()
 	cur.execute('''SELECT A.Name, A.Email, A.Scheduled, A.Year, A.Division,
+		A.Skill, B.Name, C.ShortName, C.Name, C.Worth, D.Name, E.Day, E.Time
 		A.Skill, B.Name, C.ShortName, C.Name, C.Worth, D.Name, E.Day, E.Time,
 		B.Room, B.NumberOpen, B.Seats 
 		FROM Students A INNER JOIN Sections B 

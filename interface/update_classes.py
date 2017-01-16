@@ -156,7 +156,7 @@ class update_classes:
 
 def deleteExtraRecords(filename, d):
 	import csv
-	filename = 'data/listings.csv'
+	#filename = 'data/listings.csv'
 	shortname = []
 	records = []
 	for entry in open(filename):

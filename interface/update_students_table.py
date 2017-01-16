@@ -25,8 +25,8 @@ def update_students_table(filename, d):
 				fs = fs[2:]
 		return(cs)
 	
-	
-	conn = sqlite3.connect('data/ta_scheduling.db')
+	import globalvars
+	conn = sqlite3.connect(globalvars.database_path)
 	cur = conn.cursor()
 	
 	# Make some fresh tables using executescript()
@@ -89,7 +89,6 @@ def update_students_table(filename, d):
 	''')
 	
 	
-	filename = 'data/students.tsv'
 	skiprow = 0
 	count = 0
 	for entry in open(filename):
@@ -215,7 +214,11 @@ def update_students_table(filename, d):
 						cur.execute('''INSERT OR IGNORE INTO Pref_Student_Class (StudentID, ClassID) VALUES (?,?)''', (StudentID, ClassID))
 					except:
 						continue
+<<<<<<< HEAD
+
+=======
 			
+>>>>>>> master
 			# student_class nonprefence
 			if len(entry[11]) > 0:
 				classes = entry[11].split(', ')

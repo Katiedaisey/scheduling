@@ -39,7 +39,11 @@ def doDownloadClasses():
 			self.myLabel.pack()
 			self.myEntryBox = Entry(top)
 			self.myEntryBox.pack()
+<<<<<<< HEAD
+			self.myLabel2 = Label(top, text='Enter Location to Save Classes: Documents/')
+=======
 			self.myLabel2 = Label(top, text='Enter Locantion to Save Classes: Documents/')
+>>>>>>> master
 			self.myLabel2.pack()
 			self.myEntryBox2 = Entry(top)
 			self.myEntryBox2.pack()
@@ -57,6 +61,18 @@ def doDownloadClasses():
 	
 	a = onClick()
 	import os
+<<<<<<< HEAD
+	docu_path = os.path.join(os.path.expanduser("~"), "Documents")
+	docu_path = docu_path + "/" + a[1]
+	update_classes.update_classes(a[0], docu_path,d)
+	update_classes.deleteExtraRecords(docu_path, d)
+	
+	#global matrix_sections
+	#matrix_sections = matrices.matrix_sections()
+	message = "Classes for Term " + a[0] + " Downloaded!"
+	d.set(message)
+=======
+>>>>>>> master
 	update_classes.deleteExtraRecords(d)
 	docu_path = os.path.join(os.path.expanduser("~"), "Documents")
 	message = "Analyzing Sections... Please be patient"
@@ -73,16 +89,44 @@ def doDownloadClasses():
 
 def doUpdateClasses():
 	import update_classes_table as uct
-	uct.update_classes_table()
+	
+	class MyDialog:
+		
+		def __init__(self, parent):
+			top = self.top = Toplevel(parent)
+			self.myLabel2 = Label(top, text='Enter Location of File: Documents/')
+			self.myLabel2.pack()
+			self.myEntryBox2 = Entry(top)
+			self.myEntryBox2.pack()
+			self.mySubmitButton = Button(top, text='Update', command=lambda: self.send())
+			self.mySubmitButton.pack()
+			
+		def send(self):
+			self.value = [self.myEntryBox2.get()]
+			self.top.destroy()
+		
+	def onClick():
+		inputDialog = MyDialog(root)
+		root.wait_window(inputDialog.top)
+		return(inputDialog.value)
+	
+	filename = onClick()
+	docu_path = os.path.join(os.path.expanduser("~"), "Documents")
+	docu_path = docu_path + "/" + filename[0]
+	uct.update_classes_table(docu_path)
 	global matrix_sections
 	doUpdateClassWorth()
-	#matrix_sections = matrices.matrix_sections()
-	message = "Classes Updated From file"
+	message = "Analyzing Sections... Please be patient"
+	d.set(message)
+	global matrix_sections
+	matrix_sections = matrices.matrix_sections()
+	message = "Classes Updated From File"
 	d.set(message)
 
 
 def doUpdateClassWorth():
-	conn = sqlite3.connect('data/ta_scheduling.db')
+	globalvars.database_path
+	conn = sqlite3.connect(globalvars.database_path)
 	cur = conn.cursor()
 	cur.execute('SELECT ShortName, Worth From Classes')
 	classes = cur.fetchall()
@@ -147,8 +191,16 @@ def doUpdateClassWorth():
 def doUpdateStudents():
 	import update_students_table as ust
 	import matrices
-	#import sys
-
+	import os
+	import errno
+	
+	def make_sure_path_exists(path):
+		try:
+			os.makedirs(path)
+		except OSError as exception:
+			if exception.errno != errno.EEXIST:
+				raise
+	
 	
 	class MyDialog:
 		
@@ -156,20 +208,27 @@ def doUpdateStudents():
 			top = self.top = Toplevel(parent)
 			self.myLabel = Label(top, text='Remember to rename survey response to \'students.tsv\'!')
 			self.myLabel.pack()
+			self.myLabel2 = Label(top, text='Enter File To Open:')
+			self.myLabel2.pack()
+			self.myEntryBox2 = Entry(top)
+			self.myEntryBox2.pack()
 			self.mySubmitButton = Button(top, text='Update', command=self.send)
 			self.mySubmitButton.pack()
-
 			
 		def send(self):
+			self.value = self.myEntryBox2.get()
 			self.top.destroy()
 		
 	def onClick():
 		inputDialog = MyDialog(root)
 		root.wait_window(inputDialog.top)
+		return(inputDialog.value)
 		
 	
-	onClick()
-	ust.update_students_table(d)
+	filename = onClick()
+	docu_path = os.path.join(os.path.expanduser("~"), "Documents")
+	docu_path = docu_path + "/" + filename
+	ust.update_students_table(docu_path, d)
 	matrices.matrix_pref(d)
 	mat_prefs = np.genfromtxt('data/student_preferences.csv', delimiter = ',')
 	
@@ -180,7 +239,8 @@ def doUpdateStudents():
 
 # List Classes in popup box for google forms survey
 def doListClasses():
-	conn = sqlite3.connect('data/ta_scheduling.db')
+	globalvars.database_path
+	conn = sqlite3.connect(globalvars.database_path)
 	cur = conn.cursor()
 	
 	classes = cur.execute('SELECT ShortName, Name FROM Classes')
@@ -220,7 +280,8 @@ def doListClasses():
 
 
 def doListProfessors():
-	conn = sqlite3.connect('data/ta_scheduling.db')
+	globalvars.database_path
+	conn = sqlite3.connect(globalvars.database_path)
 	cur = conn.cursor()
 	
 	profs = cur.execute('SELECT Name FROM Professors')
@@ -280,7 +341,8 @@ def doByClass():
 	leftListbox.delete(0,END)
 	chosenListbox.delete(0,END)
 	openListbox.delete(0,END)
-	conn = sqlite3.connect('data/ta_scheduling.db')
+	globalvars.database_path
+	conn = sqlite3.connect(globalvars.database_path)
 	cur = conn.cursor()
 	
 	classes = cur.execute('SELECT ShortName, Name FROM Classes')
@@ -295,7 +357,8 @@ def doByStudent():
 	leftListbox.delete(0,END)
 	chosenListbox.delete(0,END)
 	openListbox.delete(0,END)
-	conn = sqlite3.connect('data/ta_scheduling.db')
+	globalvars.database_path
+	conn = sqlite3.connect(globalvars.database_path)
 	cur = conn.cursor()
 	
 	classes = cur.execute('SELECT StudentID, Name, Scheduled FROM Students')
@@ -347,7 +410,8 @@ def doViewClass():
 	current = leftListbox.get(ANCHOR)[0]
 	global current_class
 	current_class = current
-	conn = sqlite3.connect('data/ta_scheduling.db')
+	globalvars.database_path
+	conn = sqlite3.connect(globalvars.database_path)
 	cur = conn.cursor()
 	
 	classes = cur.execute('''
@@ -398,7 +462,8 @@ def doViewClass():
 	return()
 
 def doViewStudent(student):
-	conn = sqlite3.connect('data/ta_scheduling.db')
+	globalvars.database_path
+	conn = sqlite3.connect(globalvars.database_path)
 	cur = conn.cursor()
 	# immediate time conflicts
 	unavail = cur.execute('''SELECT D.Day, D.Start, D.End
@@ -459,7 +524,8 @@ def leftselect(): #Select
 		global current_class
 		current_class = current
 		chosenListbox.delete(0, END)
-		conn = sqlite3.connect('data/ta_scheduling.db')
+		globalvars.database_path
+		conn = sqlite3.connect(globalvars.database_path)
 		cur = conn.cursor()
 		
 		classes = cur.execute('''
@@ -488,7 +554,8 @@ def leftselect(): #Select
 		current_student = current
 		stu = current.split(":")[0]
 		chosenListbox.delete(0, END)
-		conn = sqlite3.connect('data/ta_scheduling.db')
+		globalvars.database_path
+		conn = sqlite3.connect(globalvars.database_path)
 		cur = conn.cursor()
 		
 		cur.execute('''SELECT B.SectionID, C.ShortName, B.Name
@@ -510,7 +577,8 @@ def leftselect(): #Select
 		# Insert classes in right box
 		# centerselect will select class to view sections
 		openListbox.delete(0,END)
-		conn = sqlite3.connect('data/ta_scheduling.db')
+		globalvars.database_path
+		conn = sqlite3.connect(globalvars.database_path)
 		cur = conn.cursor()
 	
 		classes = cur.execute('SELECT ShortName, Name FROM Classes')
@@ -529,7 +597,8 @@ def centerselect(): #View
 	if scheduling == 'class':
 		current = chosenListbox.get(ANCHOR)
 		global current_section
-		conn = sqlite3.connect('data/ta_scheduling.db')
+		globalvars.database_path
+		conn = sqlite3.connect(globalvars.database_path)
 		cur = conn.cursor()
 		if current == "any":
 			current_section = "any"
@@ -591,7 +660,8 @@ def centerselect(): #View
 		global current_class
 		current_class = current
 		openListbox.delete(0, END)
-		conn = sqlite3.connect('data/ta_scheduling.db')
+		globalvars.database_path
+		conn = sqlite3.connect(globalvars.database_path)
 		cur = conn.cursor()
 		
 		classes = cur.execute('''
@@ -615,7 +685,8 @@ def centerselect(): #View
 
 
 def get_class_value(SectionID):
-	conn = sqlite3.connect('data/ta_scheduling.db')
+	globalvars.database_path
+	sqlite3.connect(globalvars.database_path)
 	cur = conn.cursor()
 	cla = cur.execute('''SELECT A.Worth from Classes A Inner Join Sections B ON A.ClassID = B.ClassID WHERE B.SectionID = ?''', (SectionID,))
 	cla = cur.fetchone()[0]
@@ -631,7 +702,8 @@ def openaddselect(): #Schedule
 		
 		
 		
-		conn = sqlite3.connect('data/ta_scheduling.db')
+		globalvars.database_path
+		sqlite3.connect(globalvars.database_path)
 		cur = conn.cursor()
 		stu = cur.execute('SELECT StudentID FROM Students WHERE Name = ?',(current[0],))
 		stu = cur.fetchone()[0]
@@ -695,7 +767,8 @@ def openaddselect(): #Schedule
 	if scheduling == 'student':
 		current = openListbox.get(ANCHOR)
 		global current_section
-		conn = sqlite3.connect('data/ta_scheduling.db')
+		globalvars.database_path
+		conn = sqlite3.connect(globalvars.database_path)
 		cur = conn.cursor()
 		if current == "any":
 			current_section = "any"
@@ -804,7 +877,8 @@ def openremoveselect(): #Remove
 		current = openListbox.get(ANCHOR)
 		current = current.split("; ")[1]
 		current = current.split(" (")
-		conn = sqlite3.connect('data/ta_scheduling.db')
+		globalvars.database_path
+		conn = sqlite3.connect(globalvars.database_path)
 		cur = conn.cursor()
 		stu = cur.execute('SELECT StudentID FROM Students WHERE Name = ?',(current[0],))
 		stu = cur.fetchone()[0]
@@ -874,7 +948,8 @@ def openremoveselect(): #Remove
 	if scheduling == 'student':
 		current = openListbox.get(ANCHOR)
 		global current_section
-		conn = sqlite3.connect('data/ta_scheduling.db')
+		globalvars.database_path
+		conn = sqlite3.connect(globalvars.database_path)
 		cur = conn.cursor()
 		if current == "any":
 			current_section = "any"
@@ -978,7 +1053,8 @@ def openaddblockselect(): #Add Block
 		current = openListbox.get(ANCHOR)
 		current = current.split("; ")[1]
 		current = current.split(" (")
-		conn = sqlite3.connect('data/ta_scheduling.db')
+		globalvars.database_path
+		conn = sqlite3.connect(globalvars.database_path)
 		cur = conn.cursor()
 		stu = cur.execute('SELECT StudentID FROM Students WHERE Name = ?',(current[0],))
 		stu = cur.fetchone()[0]
@@ -1022,7 +1098,8 @@ def openaddblockselect(): #Add Block
 	if scheduling == 'student':
 		current = openListbox.get(ANCHOR)
 		global current_section
-		conn = sqlite3.connect('data/ta_scheduling.db')
+		globalvars.database_path
+		conn = sqlite3.connect(globalvars.database_path)
 		cur = conn.cursor()
 		if current == "any":
 			current_section = "any"
@@ -1072,7 +1149,8 @@ def openremoveblockselect(): #Remove Block
 		current = openListbox.get(ANCHOR)
 		current = current.split("; ")[1]
 		current = current.split(" (")
-		conn = sqlite3.connect('data/ta_scheduling.db')
+		globalvars.database_path
+		conn = sqlite3.connect(globalvars.database_path)
 		cur = conn.cursor()
 		stu = cur.execute('SELECT StudentID FROM Students WHERE Name = ?',(current[0],))
 		stu = cur.fetchone()[0]
@@ -1110,7 +1188,8 @@ def openremoveblockselect(): #Remove Block
 	if scheduling == 'student':
 		current = openListbox.get(ANCHOR)
 		global current_section
-		conn = sqlite3.connect('data/ta_scheduling.db')
+		globalvars.database_path
+		conn = sqlite3.connect(globalvars.database_path)
 		cur = conn.cursor()
 		if current == "any":
 			current_section = "any"
@@ -1141,7 +1220,8 @@ def openremoveblockselect(): #Remove Block
 
 
 def addPrefForClass(student):
-	conn = sqlite3.connect('data/ta_scheduling.db')
+	globalvars.database_path
+	conn = sqlite3.connect(globalvars.database_path)
 	cur = conn.cursor()
 	secs = cur.execute('''SELECT A.SectionID FROM Classes B
 		INNER JOIN Sections A 
@@ -1155,7 +1235,8 @@ def addPrefForClass(student):
 		mat_prefs[stuID,secID] = int(cpref) + 10000
 
 def removePrefForClass(student):
-	conn = sqlite3.connect('data/ta_scheduling.db')
+	globalvars.database_path
+	conn = sqlite3.connect(globalvars.database_path)
 	cur = conn.cursor()
 	secs = cur.execute('''SELECT A.SectionID FROM Classes B
 		INNER JOIN Sections A 
@@ -1229,7 +1310,8 @@ def doNewSchedule():
 	
 	
 	# update database
-	conn = sqlite3.connect('data/ta_scheduling.db')
+	globalvars.database_path
+	conn = sqlite3.connect(globalvars.database_path)
 	cur = conn.cursor()
 	cur.execute('UPDATE Sections SET Scheduled = 0')
 	cur.execute('UPDATE Sections SET StudentID = 0')
@@ -1466,11 +1548,21 @@ googlemenu.add_command(label = "List Professors", command = lambda : doListProfe
 
 
 
-
 # Run at startup
 #doNewSchedule()
 import os
+<<<<<<< HEAD
+try:
+	dir_path = os.path.join(os.environ['APPDATA'], 'TAScheduling')
+except KeyError:
+	dir_path = os.path.join(os.environ['HOME'], '.TAScheduling')
+if not os.path.exists(dir_path):
+	os.makedirs(dir_path)
+globalvars.database_path = os.path.join(dir_path, 'tascheduling.db')
+sqlite3.connect(globalvars.database_path)
+=======
 import errno
+>>>>>>> master
 
 def make_sure_path_exists(path):
 	try:
@@ -1480,7 +1572,15 @@ def make_sure_path_exists(path):
 			raise
 make_sure_path_exists('data/')
 
+import errno
 
+def make_sure_path_exists(path):
+	try:
+		os.makedirs(path)
+	except OSError as exception:
+		if exception.errno != errno.EEXIST:
+			raise
+make_sure_path_exists('data/')
 
 
 root.mainloop()

@@ -344,7 +344,6 @@ def gen_sec_stu_matrix(mat_prefs, pop, keep, mats, output):
 	mat_base.flags.writeable = True
 	
 	
-	
 	sec_prefs = np.genfromtxt('data/section_section_matrix.csv', delimiter=',')
 	stu_sec_prefs = mat_prefs
 	#stu_sec_prefs = np.genfromtxt('student_preferences.csv', delimiter = ',')
@@ -359,7 +358,6 @@ def gen_sec_stu_matrix(mat_prefs, pop, keep, mats, output):
 	#mat_sch.flags.writeable = True
 	mat_base = np.copy(mat_yes)
 	mat_base.flags.writeable = True
-	
 	
 	
 	
@@ -382,7 +380,6 @@ def gen_sec_stu_matrix(mat_prefs, pop, keep, mats, output):
 				
 				# remove sections from list to be scheduled
 				cl = [i for i, x in enumerate(mat_base[count2,:]) if x==1]
-				print count2,cl
 				# scheduled via single section
 				if len(cl) > 0:
 					
@@ -395,7 +392,6 @@ def gen_sec_stu_matrix(mat_prefs, pop, keep, mats, output):
 				# any section, via mat_add, pref for class
 				if len(cl) == 0:
 					cl = [i for i, x in enumerate(mat_add[count2,:]) if x==1]
-					print cl
 					cl = random.choice(cl)
 					mat_base[count2,:] = mat_sch[cl,:]
 					# get line containing classes student is scheduled for

@@ -89,7 +89,6 @@ def matrix_pref(d):
 		message = "Getting Preferences for Student Number " + str(i + 1)
 		d.set(message)
 		for j in range(len(sections)):
-		
 			# init values
 			conflict1 = 0
 			conflict2 = 0

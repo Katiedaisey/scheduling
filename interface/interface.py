@@ -62,20 +62,9 @@ def doDownloadClasses():
 	update_classes.update_classes(a[0], docu_path,d)
 	update_classes.deleteExtraRecords(docu_path, d)
 	
-	
 	message = "Classes for Term " + a[0] + " Downloaded!"
 	d.set(message)
-	update_classes.deleteExtraRecords(d)
-	docu_path = os.path.join(os.path.expanduser("~"), "Documents")
-	message = "Analyzing Sections... Please be patient"
-	docu_path = docu_path + "/" + a[1]
-	d.set(message)
 	
-	update_classes.update_classes(a[0], docu_path,d)
-	global matrix_sections
-	update_classes.deleteExtraRecords(docu_path, d)
-	matrix_sections = matrices.matrix_sections()
-	message = "Classes for Term " + a + " Downloaded!"
 	
 
 
@@ -105,10 +94,7 @@ def doUpdateClasses():
 	filename = onClick()
 	docu_path = os.path.join(os.path.expanduser("~"), "Documents")
 	docu_path = docu_path + "/" + filename[0]
-	print docu_path
 	uct.update_classes_table(docu_path)
-	global matrix_sections
-	#doUpdateClassWorth()
 	message = "Analyzing Sections... Please be patient"
 	d.set(message)
 	global matrix_sections

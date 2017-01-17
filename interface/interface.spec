@@ -4,10 +4,10 @@ block_cipher = None
 
 
 a = Analysis(['interface.py'],
-             pathex=['/Users/katiedaisey/Desktop/scheduling/interface'],
+             pathex=['/Users/katiedaisey/Desktop/projects/scheduling/interface'],
              binaries=None,
              datas=None,
-             hiddenimports=['six','packaging', 'packaging.version', 'packaging.specifiers', 'packaging.requirements'],
+             hiddenimports=[],
              hookspath=[],
              runtime_hooks=[],
              excludes=[],
@@ -21,9 +21,25 @@ exe = EXE(pyz,
           a.binaries,
           a.zipfiles,
           a.datas,
-          name='TAScheduling',
-          icon='icon.icns',
+          name='TA Scheduling',
           debug=False,
           strip=False,
           upx=True,
-          console=False )
+          console=False , version='version.txt', icon='icon.ico')
+app = BUNDLE(exe,
+             name='TA Scheduling.app',
+             icon='icon.ico',
+             bundle_identifier='com.kmd.katiedaisey.TAScheduling',
+             info_plist={
+             'CFBundleIdentifier': 'com.kmd.katiedaisey.TAScheduling',
+             'CFBundleShortVersionString': '1.0.0',
+             'CFBundleExecutable': 'MacOS/TA Scheduling',
+             'CFBundleName': 'TA Scheduling',
+             'CFBundleInfoDictionaryVersion': '6.0',
+             'CFBundleDisplayName': 'TA Scheduling',
+             'CFBundleIconFile': 'icon.ico',
+             'CFBundlePackageType': 'APPL',
+             'LSBackgroundOnly': '1',
+             'UILaunchImageFile': 'icon.ico',
+             }
+             )

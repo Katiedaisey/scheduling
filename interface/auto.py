@@ -1,14 +1,4 @@
-<<<<<<< HEAD
-=======
 
-
-
-
-
-
-
-
->>>>>>> master
 def get_student_worth(stu):
 	worth = amount[stu]
 	return(worth)
@@ -17,15 +7,7 @@ def set_student_worth(stu, sec):
 	import sqlite3
 	import globalvars
 	
-<<<<<<< Updated upstream
-<<<<<<< HEAD
 	conn = sqlite3.connect(globalvars.database_path)
-=======
-	conn = sqlite3.connect(globalvars.database_pat
->>>>>>> master
-=======
-	conn = sqlite3.connect(globalvars.database_path)
->>>>>>> Stashed changes
 	cur = conn.cursor()
 	stu_worth = cur.execute('SELECT Scheduled FROM Students')
 	stu_worth = cur.fetchall()
@@ -34,17 +16,8 @@ def set_student_worth(stu, sec):
 def get_section_worth(sec):
 	import sqlite3
 	import globalvars
-	
-<<<<<<< Updated upstream
-<<<<<<< HEAD
 	conn = sqlite3.connect(globalvars.database_path)
-=======
-	conn = sqlite3.connect(globalvars.database_pat
-=======
-	conn = sqlite3.connect(globalvars.database_path)
->>>>>>> Stashed changes
 	cur = conn.cursor()
->>>>>>> master
 	sections = cur.execute('SELECT DISTINCT SectionID FROM Sections')
 	sections = cur.fetchall()
 	sec_worth = cur.execute('SELECT A.Worth FROM Classes A INNER JOIN Sections B ON A.ClassID = B.ClassID')
@@ -97,16 +70,7 @@ def gen_sec_matrix(pop, keep, output):
 	import random
 	import os
 	import globalvars
-<<<<<<< HEAD
 	conn = sqlite3.connect(globalvars.database_path)
-=======
-	
-<<<<<<< Updated upstream
-	conn = sqlite3.connect(globalvars.database_pat
->>>>>>> master
-=======
-	conn = sqlite3.connect(globalvars.database_path)
->>>>>>> Stashed changes
 	cur = conn.cursor()
 	sections = cur.execute('SELECT DISTINCT SectionID FROM Sections')
 	sections = cur.fetchall()
@@ -119,7 +83,9 @@ def gen_sec_matrix(pop, keep, output):
 	np.fill_diagonal(mat_base, 1)
 	mat_base.flags.writeable = True
 	
-	sec_prefs = np.genfromtxt('data/section_section_matrix.csv', delimiter=',')
+	#sec_prefs = np.genfromtxt('data/section_section_matrix.csv', delimiter=',')
+	sec_prefs = globalvars.matrix_sections[:,:]
+	print sec_prefs.shape
 	#stu_sec_prefs = np.genfromtxt('student_preferences.csv', delimiter = ',')
 	
 	
@@ -349,7 +315,7 @@ def gen_sec_matrix(pop, keep, output):
 
 
 # generate set of sec_stu matrices
-def gen_sec_stu_matrix(mat_prefs, pop, keep, mats, output):
+def gen_sec_stu_matrix(pop, keep, mats, output):
 	import sqlite3
 	import numpy as np
 	import random
@@ -364,12 +330,14 @@ def gen_sec_stu_matrix(mat_prefs, pop, keep, mats, output):
 	sec_worth = cur.execute('SELECT A.Worth FROM Classes A INNER JOIN Sections B ON A.ClassID = B.ClassID')
 	sec_worth = cur.fetchall()
 	
+	
+	mat_prefs = globalvars.mat_prefs[:,:]
 	mat_base = np.zeros((len(sections), len(sections)))
 	np.fill_diagonal(mat_base, 1)
 	mat_base.flags.writeable = True
 	
 	
-	sec_prefs = np.genfromtxt('data/section_section_matrix.csv', delimiter=',')
+	sec_prefs = globalvars.matrix_sections
 	stu_sec_prefs = mat_prefs
 	#stu_sec_prefs = np.genfromtxt('student_preferences.csv', delimiter = ',')
 	
@@ -399,7 +367,6 @@ def gen_sec_stu_matrix(mat_prefs, pop, keep, mats, output):
 		for s in stu_worth:
 			# for rounding issues
 			if s[0] > 0: #scheduled at all - already has line
-				print count2
 				# count2 is student
 				# need to get sections student has
 				#mat_base[count2,:] = mat_sch[count2,:]
@@ -426,6 +393,7 @@ def gen_sec_stu_matrix(mat_prefs, pop, keep, mats, output):
 				cl = [i for i, x in enumerate(mat_base[count2,:]) if x==1]
 				for c in cl:
 					base_sec.remove(c)
+			count2 = count2 + 1
 		
 		for p in range(pop):
 			# get copy of matrix with already scheduled tas
@@ -477,6 +445,8 @@ def gen_sec_stu_matrix(mat_prefs, pop, keep, mats, output):
 #m = gen_sec_stu_matrix(prefs, 1, 1, 1, "output")
 
 def break_up(output):
+	import numpy as np
+	import os
 	matrices = np.load(output + "/best_sec_sec.npy")
 	
 	d = os.path.dirname(output + "/matrices/")
@@ -493,6 +463,8 @@ def break_up(output):
 #break_up("output")
 
 def break_up2(output):
+	import numpy as np
+	import os
 	matrices = np.load(output + "/best_stu_sec.npy")
 	
 	d = os.path.dirname(output + "/matrices2/")
@@ -508,13 +480,14 @@ def break_up2(output):
 
 #break_up2("output")
 
-def updateDatabase(schedule, output, mat_pref):
-	import globalvars
+def updateDatabase(schedule, output):
 	import sqlite3
-	import numpy as np
 	import globalvars
 	conn = sqlite3.connect(globalvars.database_path)
 	cur = conn.cursor()
+	
+	#mat_pref = globalvars.mat_prefs[:,:]
+	
 	# reset student scheduled
 	cur.execute('UPDATE Students SET Scheduled = ?', (0,))
 	for sch in range(schedule.shape[1]):
@@ -531,13 +504,7 @@ def updateDatabase(schedule, output, mat_pref):
 			cur.execute('UPDATE Sections SET Scheduled = ? WHERE SectionID = ?', (0, sch + 1))
 			cur.execute('UPDATE Sections Set StudentID = ? WHERE SectionID = ?', (0, sch + 1))
 	conn.commit()
-	import numpy as np
-	#import numpy as np
-	np.save(output + '/mat_prefs.npy', mat_pref)
-#schedule = np.load('output/mat_yes.npy')
-#m = updateDatabase(schedule)
 
-#def revertDatabase(mat_yes):
 
 
 

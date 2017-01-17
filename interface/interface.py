@@ -39,11 +39,7 @@ def doDownloadClasses():
 			self.myLabel.pack()
 			self.myEntryBox = Entry(top)
 			self.myEntryBox.pack()
-<<<<<<< HEAD
 			self.myLabel2 = Label(top, text='Enter Location to Save Classes: Documents/')
-=======
-			self.myLabel2 = Label(top, text='Enter Locantion to Save Classes: Documents/')
->>>>>>> master
 			self.myLabel2.pack()
 			self.myEntryBox2 = Entry(top)
 			self.myEntryBox2.pack()
@@ -61,18 +57,14 @@ def doDownloadClasses():
 	
 	a = onClick()
 	import os
-<<<<<<< HEAD
 	docu_path = os.path.join(os.path.expanduser("~"), "Documents")
 	docu_path = docu_path + "/" + a[1]
 	update_classes.update_classes(a[0], docu_path,d)
 	update_classes.deleteExtraRecords(docu_path, d)
 	
-	#global matrix_sections
-	#matrix_sections = matrices.matrix_sections()
+	
 	message = "Classes for Term " + a[0] + " Downloaded!"
 	d.set(message)
-=======
->>>>>>> master
 	update_classes.deleteExtraRecords(d)
 	docu_path = os.path.join(os.path.expanduser("~"), "Documents")
 	message = "Analyzing Sections... Please be patient"
@@ -113,9 +105,10 @@ def doUpdateClasses():
 	filename = onClick()
 	docu_path = os.path.join(os.path.expanduser("~"), "Documents")
 	docu_path = docu_path + "/" + filename[0]
+	print docu_path
 	uct.update_classes_table(docu_path)
 	global matrix_sections
-	doUpdateClassWorth()
+	#doUpdateClassWorth()
 	message = "Analyzing Sections... Please be patient"
 	d.set(message)
 	global matrix_sections
@@ -230,7 +223,7 @@ def doUpdateStudents():
 	docu_path = docu_path + "/" + filename
 	ust.update_students_table(docu_path, d)
 	matrices.matrix_pref(d)
-	mat_prefs = np.genfromtxt('data/student_preferences.csv', delimiter = ',')
+	globalvars.mat_prefs = np.load(globalvars.mat_prefs_path)
 	
 	message = "Student Responses Updated!"
 	d.set(message)
@@ -371,7 +364,6 @@ def doByStudent():
 
 def doAutomateFast():
 	doSave(output2 = output)
-	global mat_prefs
 	message = "Generating TA Lines"
 	d.set(message)
 	auto.gen_sec_matrix(pop = 100, keep = 10, output = output)
@@ -379,11 +371,11 @@ def doAutomateFast():
 	global mat_sch
 	message = "Matching TAs with Lines"
 	d.set(message)
-	mat_sch = auto.gen_sec_stu_matrix(mat_prefs = mat_prefs, pop = 1000, keep = 1, mats = 10, output = output)[0]
+	mat_sch = auto.gen_sec_stu_matrix(pop = 1000, keep = 1, mats = 10, output = output)[0]
 	
 	
 	global output
-	auto.updateDatabase(mat_sch, output, mat_prefs)
+	auto.updateDatabase(mat_sch, output)
 	message = "Schedule Created!"
 	d.set(message)
 	return()
@@ -398,8 +390,8 @@ def doAutomateBest():
 	global mat_prefs
 	message = "Matching TAs with Lines"
 	d.set(message)
-	mat_sch = auto.gen_sec_stu_matrix(mat_prefs = mat_prefs, pop = 10000, keep = 1, mats = 100, output = output)[0]
-	auto.updateDatabase(mat_sch, output, mat_prefs)
+	mat_sch = auto.gen_sec_stu_matrix(pop = 10000, keep = 1, mats = 100, output = output)[0]
+	auto.updateDatabase(mat_sch, output)
 	message = "Schedule Created!"
 	d.set(message)
 	return()
@@ -622,7 +614,7 @@ def centerselect(): #View
 				colnum = section_index[sec]
 				stu = students[i][1]
 				stuID = student_index[stu]
-				student_tuples.append((int(mat_prefs[stuID,colnum]),(students[i][1],students[i][0], students[i][2]),i)) # update from i to stuindex
+				student_tuples.append((int(globalvars.mat_prefs[stuID,colnum]),(students[i][1],students[i][0], students[i][2]),i)) # update from i to stuindex
 			else:
 				student_tuples.append((int(0),(students[i][1], students[i][0], students[i][2]),i))
 		# sort p in order of highest value first
@@ -644,7 +636,7 @@ def centerselect(): #View
 				colnum = section_index[sec]
 				stu = students[i][1]
 				stuID = student_index[stu]
-				student_tuples.append((int(mat_prefs[stuID,colnum]),(students[i][1],students[i][0], students[i][2]),i)) # update from i to stuindex
+				student_tuples.append((int(globalvars.mat_prefs[stuID,colnum]),(students[i][1],students[i][0], students[i][2]),i)) # update from i to stuindex
 			else:
 				student_tuples.append((int(0),(students[i][1], students[i][0], students[i][2]),i))
 		# sort p in order of highest value first
@@ -686,7 +678,7 @@ def centerselect(): #View
 
 def get_class_value(SectionID):
 	globalvars.database_path
-	sqlite3.connect(globalvars.database_path)
+	conn = sqlite3.connect(globalvars.database_path)
 	cur = conn.cursor()
 	cla = cur.execute('''SELECT A.Worth from Classes A Inner Join Sections B ON A.ClassID = B.ClassID WHERE B.SectionID = ?''', (SectionID,))
 	cla = cur.fetchone()[0]
@@ -702,7 +694,7 @@ def openaddselect(): #Schedule
 		
 		
 		
-		globalvars.database_path
+		
 		sqlite3.connect(globalvars.database_path)
 		cur = conn.cursor()
 		stu = cur.execute('SELECT StudentID FROM Students WHERE Name = ?',(current[0],))
@@ -1231,8 +1223,8 @@ def addPrefForClass(student):
 	stuID = student_index[student]
 	for s in secs:
 		secID = section_index[s[0]]
-		cpref = mat_prefs[stuID,secID]
-		mat_prefs[stuID,secID] = int(cpref) + 10000
+		cpref = globalvars.mat_prefs[stuID,secID]
+		globalvars.mat_prefs[stuID,secID] = int(cpref) + 10000
 
 def removePrefForClass(student):
 	globalvars.database_path
@@ -1246,30 +1238,26 @@ def removePrefForClass(student):
 	stuID = student_index[student]
 	for s in secs:
 		secID = section_index[s[0]]
-		cpref = mat_prefs[stuID,secID]
-		mat_prefs[stuID,secID] = int(cpref) - 10000
+		cpref = globalvars.mat_prefs[stuID,secID]
+		globalvars.mat_prefs[stuID,secID] = int(cpref) - 10000
 
 
 # File functions
 
 def doNewSchedule():
 	import numpy as np
+	import globalvars
 	message = "Starting a New Schedule"
 	d.set(message)
 	# Data
-	global mat_prefs
 	try:
 		# open from file
-<<<<<<< HEAD
-		mat_prefs = np.genfromtxt('data/student_preferences.csv' , delimiter=",")
-=======
-		mat_prefs = np.genfromtxt('data/student_preferences.csv', delimiter = ',')
->>>>>>> origin/master
+		globalvars.mat_prefs = np.load(globalvars.mat_prefs_path)
 	except:
 		# generate if unable to open
 		message = "Generating Missing Files"
 		d.set(message)
-		#mat_prefs = matrices.matrix_pref(d)
+		globalvars.mat_prefs = matrices.matrix_pref(d)
 	global section_index
 	section_index = matrices.section_index()
 	global student_index
@@ -1280,19 +1268,17 @@ def doNewSchedule():
 	mat_add = matrices.matrix_schedule_manual()
 	global mat_no
 	mat_no = matrices.matrix_schedule_manual()
-	global matrix_sections
 	try:
-		#matrix_sections = matrices.matrix_sections()
-		matrix_sections = np.genfromtxt('data/section_section_matrix.csv', delimiter=',')
+		globalvars.matrix_sections = np.load(globalvars.sec_sec_matrix_path)
 		
 	except:
 		try:
 			message = "Generating Missing Files"
 			d.set(message)
-			matrix_sections = matrices.matrix_sections()
+			globalvars.matrix_sections = matrices.matrix_sections()
 		except:
-			matrix_sections = np.zeros((100,100))
-	matrix_sections.flags.writeable = True
+			globalvars.matrix_sections = np.zeros((100,100))
+	globalvars.matrix_sections.flags.writeable = True
 	
 	
 	global output
@@ -1306,7 +1292,6 @@ def doNewSchedule():
 	global sec
 	
 	
-	print mat_prefs.shape
 	
 	
 	# update database
@@ -1368,10 +1353,8 @@ def doOpenSchedule(output2 = None):
 	mat_add = np.load(output + "/mat_add.npy")
 	global mat_no
 	mat_no = np.load(output + "/mat_no.npy")
-	global matrix_sections
-	matrix_sections = np.load(output + "/matrix_sections.npy")
-	global mat_prefs
-	mat_prefs = np.load(output + "/mat_prefs.npy") # matrices.matrix_pref()
+	globalvars.matrix_sections = np.load(output + "/matrix_sections.npy")
+	globalvars.mat_prefs = np.load(output + "/mat_prefs.npy") # matrices.matrix_pref()
 	global section_index
 	section_index = matrices.section_index()
 	global student_index
@@ -1386,8 +1369,8 @@ def doSave(output2):
 	np.save(output2 + "/mat_yes.npy", mat_yes)
 	np.save(output2 + "/mat_add.npy", mat_add)
 	np.save(output2 + "/mat_no.npy", mat_no)
-	np.save(output2 + "/matrix_sections.npy", matrix_sections)
-	np.save(output2 + "/mat_prefs.npy", mat_prefs)
+	np.save(output2 + "/matrix_sections.npy", globalvars.matrix_sections)
+	np.save(output2 + "/mat_prefs.npy", globalvars.mat_prefs)
 	message = "Schedule Saved"
 	d.set(message)
 
@@ -1433,8 +1416,8 @@ def doSaveAs():
 	np.save(output + "/mat_yes.npy",mat_yes)
 	np.save(output + "/mat_add.npy", mat_add)
 	np.save(output + "/mat_no.npy", mat_no)
-	np.save(output + "/mat_prefs.npy", mat_prefs)
-	np.save(output + "/matrix_sections.npy", matrix_sections)
+	np.save(output + "/mat_prefs.npy", globalvars.mat_prefs)
+	np.save(output + "/matrix_sections.npy", globalvars.matrix_sections)
 	message = "Schedule Saved"
 	d.set(message)
 
@@ -1558,6 +1541,11 @@ except KeyError:
 if not os.path.exists(dir_path):
 	os.makedirs(dir_path)
 globalvars.database_path = os.path.join(dir_path, 'tascheduling.db')
+globalvars.mat_prefs_path = os.path.join(dir_path, 'student_preferences.npy')
+globalvars.sec_sec_matrix_path = os.path.join(dir_path, 'section_section_matrix.npy')
+globalvars.para_path = os.path.join(dir_path, 'parameters.txt')
+
+
 sqlite3.connect(globalvars.database_path)
 import errno
 def make_sure_path_exists(path):

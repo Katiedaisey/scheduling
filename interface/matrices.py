@@ -5,13 +5,7 @@
 def matrix_sections():
 	import sqlite3
 	import numpy as np
-<<<<<<< HEAD
-	
 	import globalvars
-=======
-	import globalvars
-	
->>>>>>> master
 	conn = sqlite3.connect(globalvars.database_path)
 	cur = conn.cursor()
 	
@@ -68,7 +62,9 @@ def matrix_sections():
 			mat_sections[i,j] = conflicts + pref + pref2
 	
 	#Writing CSV file
-	np.savetxt("data/section_section_matrix.csv", mat_sections, delimiter=",")
+	np.save(globalvars.sec_sec_matrix_path, mat_sections)
+	globalvars.matrix_sections = mat_sections
+	#np.savetxt("data/section_section_matrix.csv", mat_sections, delimiter=",")
 	return(mat_sections)
  
 
@@ -250,7 +246,8 @@ def matrix_pref(d):
 			
 			
 	
-	np.savetxt("data/student_preferences.csv", mat_prefs, delimiter=",")
+	np.save(globalvars.mat_prefs_path, mat_prefs)
+	globalvars.mat_prefs = mat_prefs
 	return(mat_prefs)
 
 

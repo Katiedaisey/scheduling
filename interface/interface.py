@@ -27,6 +27,7 @@ def doQuit():
 
 
 def doDownloadClasses():
+	print 'Classes Downloaded'
 	import update_classes
 	#import sys
 	
@@ -69,6 +70,7 @@ def doDownloadClasses():
 
 
 def doUpdateClasses():
+	print 'Classes updated'
 	import update_classes_table as uct
 	
 	class MyDialog:
@@ -101,9 +103,11 @@ def doUpdateClasses():
 	matrix_sections = matrices.matrix_sections()
 	message = "Classes Updated From File"
 	d.set(message)
+	
 
 
 def doUpdateClassWorth():
+	print 'class worths updated'
 	globalvars.database_path
 	conn = sqlite3.connect(globalvars.database_path)
 	cur = conn.cursor()
@@ -164,10 +168,12 @@ def doUpdateClassWorth():
 	conn.commit()
 	message = "Updated Class Worths!"
 	d.set(message)
+	
 
 
 
 def doUpdateStudents():
+	print 'students updated'
 	import update_students_table as ust
 	import matrices
 	import os
@@ -213,11 +219,13 @@ def doUpdateStudents():
 	
 	message = "Student Responses Updated!"
 	d.set(message)
+	
 
 
 
 # List Classes in popup box for google forms survey
 def doListClasses():
+	print 'doListClasses'
 	globalvars.database_path
 	conn = sqlite3.connect(globalvars.database_path)
 	cur = conn.cursor()
@@ -254,11 +262,13 @@ def doListClasses():
 	    return()
 	
 	onClick()
+	
 
 
 
 
 def doListProfessors():
+	print 'doListProfessors'
 	globalvars.database_path
 	conn = sqlite3.connect(globalvars.database_path)
 	cur = conn.cursor()
@@ -294,6 +304,7 @@ def doListProfessors():
 	    return()
 	
 	onClick()
+	
 
 
 class StatusBar(Frame):
@@ -314,6 +325,7 @@ class StatusBar(Frame):
 
 
 def doByClass():
+	print 'doByClass'
 	global scheduling
 	scheduling = 'class'
 	
@@ -329,8 +341,10 @@ def doByClass():
 	
 	for item in classes:
 		leftListbox.insert(END, item)
+	
 
 def doByStudent():
+	print 'doByStudent'
 	global scheduling
 	scheduling = 'student'
 	leftListbox.delete(0,END)
@@ -347,8 +361,10 @@ def doByStudent():
 	for item in classes:
 		item = str(item[0]) + ": " + item[1] + " (" + str(item[2]) + ")"
 		leftListbox.insert(END, item)
+	
 
 def doAutomateFast():
+	print 'AutomateFast'
 	doSave(output2 = output)
 	message = "Generating TA Lines"
 	d.set(message)
@@ -364,9 +380,11 @@ def doAutomateFast():
 	auto.updateDatabase(mat_sch, output)
 	message = "Schedule Created!"
 	d.set(message)
+	
 	return()
 
 def doAutomateBest():
+	print 'doAutomateBest'
 	doSave(output2 = output)
 	message = "Generating TA Lines"
 	d.set(message)
@@ -382,9 +400,11 @@ def doAutomateBest():
 	d.set(message)
 	return()
 	
+	
 
 
 def doViewClass():
+	print 'doViewClass'
 	current = leftListbox.get(ANCHOR)[0]
 	global current_class
 	current_class = current
@@ -440,6 +460,7 @@ def doViewClass():
 	return()
 
 def doViewStudent(student):
+	print 'doViewStudent'
 	globalvars.database_path
 	conn = sqlite3.connect(globalvars.database_path)
 	cur = conn.cursor()
@@ -497,6 +518,7 @@ def doViewStudent(student):
 
 def leftselect(): #Select
 	if scheduling == 'class':
+		print 'leftselect-class'
 		doViewClass()
 		current = leftListbox.get(ANCHOR)[0]
 		global current_class
@@ -526,6 +548,7 @@ def leftselect(): #Select
 	
 	
 	if scheduling == 'student':
+		print 'leftselect-student'
 		doCalendar(calendarFrame)
 		current = leftListbox.get(ANCHOR)
 		global current_student
@@ -573,6 +596,7 @@ def leftselect(): #Select
 # list in order of mat_prefs value
 def centerselect(): #View
 	if scheduling == 'class':
+		print 'centerselect-class'
 		current = chosenListbox.get(ANCHOR)
 		global current_section
 		globalvars.database_path
@@ -634,6 +658,7 @@ def centerselect(): #View
 		
 	
 	if scheduling == 'student':
+		print 'centerselect-student'
 		current = openListbox.get(ANCHOR)[0]
 		global current_class
 		current_class = current
@@ -674,6 +699,7 @@ def get_class_value(SectionID):
 def openaddselect(): #Schedule
 	# schedule student to class
 	if scheduling == 'class':
+		print 'add-class'
 		current = openListbox.get(ANCHOR)
 		current = current.split("; ")[1]
 		current = current.split(" (")[0]
@@ -713,6 +739,7 @@ def openaddselect(): #Schedule
 		
 		# byClass add student to any section of class
 		if current_section == "any":
+			print 'any'
 			addPrefForClass(stu)
 			global mat_yes
 			global mat_add
@@ -743,6 +770,7 @@ def openaddselect(): #Schedule
 	
 	
 	if scheduling == 'student':
+		print 'add-student'
 		current = openListbox.get(ANCHOR)
 		global current_section
 		globalvars.database_path
@@ -812,6 +840,7 @@ def openaddselect(): #Schedule
 		
 		#byStudent add student to any section of class
 		if current_section == "any":
+			print 'any'
 			
 			# add in mats
 			addPrefForClass(stu)
@@ -852,6 +881,7 @@ def openaddselect(): #Schedule
 def openremoveselect(): #Remove
 	# remove student from class
 	if scheduling == 'class':
+		print 'remove-class'
 		current = openListbox.get(ANCHOR)
 		current = current.split("; ")[1]
 		current = current.split(" (")
@@ -893,6 +923,7 @@ def openremoveselect(): #Remove
 		
 		# byClass remove student from any section
 		if current_section == "any":
+			print 'any'
 			
 			# remove scheduled from mats
 			global mat_yes
@@ -924,6 +955,7 @@ def openremoveselect(): #Remove
 	
 	
 	if scheduling == 'student':
+		print 'remove-student'
 		current = openListbox.get(ANCHOR)
 		global current_section
 		globalvars.database_path
@@ -986,6 +1018,7 @@ def openremoveselect(): #Remove
 		
 		# byStudent remove from any section
 		if current_section == "any":
+			print 'any'
 			global current_class
 			removePrefForClass(stu)
 			
@@ -1028,6 +1061,7 @@ def openremoveselect(): #Remove
 def openaddblockselect(): #Add Block
 	# block student from class
 	if scheduling == 'class':
+		print 'block-class'
 		current = openListbox.get(ANCHOR)
 		current = current.split("; ")[1]
 		current = current.split(" (")
@@ -1056,6 +1090,7 @@ def openaddblockselect(): #Add Block
 		
 		# byClass block of student from any section in class
 		if current_section == 'any':
+			print 'any'
 			removePrefForClass(stu)
 			
 			cur.execute('SELECT ClassID FROM Classes WHERE ShortName = ?', (current_class,))
@@ -1074,6 +1109,7 @@ def openaddblockselect(): #Add Block
 	
 	# byStudent block from class
 	if scheduling == 'student':
+		print 'block-student'
 		current = openListbox.get(ANCHOR)
 		global current_section
 		globalvars.database_path
@@ -1104,6 +1140,7 @@ def openaddblockselect(): #Add Block
 		
 		#by Student block of any section of class
 		if current_section == 'any':
+			print 'any'
 			global mat_yes
 			global mat_no
 			global section_index
@@ -1124,6 +1161,7 @@ def openaddblockselect(): #Add Block
 def openremoveblockselect(): #Remove Block
 	# remove block from student from class
 	if scheduling == 'class':
+		print 'rmblock-class'
 		current = openListbox.get(ANCHOR)
 		current = current.split("; ")[1]
 		current = current.split(" (")
@@ -1149,6 +1187,7 @@ def openremoveblockselect(): #Remove Block
 		
 		# byClass remove block from any section of class
 		if current_section == 'any':
+			print 'any'
 			addPrefForClass(stu)
 			
 			cur.execute('SELECT ClassID FROM Classes WHERE ShortName = ?', (current_class,))
@@ -1164,6 +1203,7 @@ def openremoveblockselect(): #Remove Block
 		
 	
 	if scheduling == 'student':
+		print 'rmblock-student'
 		current = openListbox.get(ANCHOR)
 		global current_section
 		globalvars.database_path
@@ -1171,6 +1211,7 @@ def openremoveblockselect(): #Remove Block
 		cur = conn.cursor()
 		if current == "any":
 			current_section = "any"
+			print 'any-not yet supported'
 		else:
 			current_section = current[1]
 		
@@ -1231,6 +1272,7 @@ def removePrefForClass(student):
 # File functions
 
 def doNewSchedule():
+	print 'doNewSchedule'
 	import numpy as np
 	import globalvars
 	message = "Starting a New Schedule"
@@ -1295,6 +1337,7 @@ def doNewSchedule():
 
 
 def doOpenSchedule(output2 = None):
+	print 'doOpenSchedule'
 	import os
 	import errno
 	
@@ -1352,6 +1395,7 @@ def doOpenSchedule(output2 = None):
 
 
 def doSave(output2):
+	print 'doSave'
 	np.save(output2 + "/mat_yes.npy", mat_yes)
 	np.save(output2 + "/mat_add.npy", mat_add)
 	np.save(output2 + "/mat_no.npy", mat_no)
@@ -1363,6 +1407,7 @@ def doSave(output2):
 
 
 def doSaveAs():
+	print 'doSaveAs'
 	
 	import os
 	import errno

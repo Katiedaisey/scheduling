@@ -1,6 +1,7 @@
 # Export Functions
 
 def doExportMail(output2, d):
+	print 'doExportMail'
 	import sqlite3
 	import globalvars
 	
@@ -54,6 +55,7 @@ def doExportMail(output2, d):
 #doExportMail("output")
 
 def doExportSusan(output2, d):
+	print 'doExportSusan'
 	import sqlite3
 	import globalvars
 	
@@ -72,7 +74,7 @@ def doExportSusan(output2, d):
 		for s in secs:
 			allsecs = allsecs + s[1] + " (" + s[0] + ")" + "\t"
 	
-	filename = output2 + "/classeslist.tsv"
+	filename = output2 + "/Susanclasseslist.tsv"
 	with open(filename, 'wb') as f:
 		for row in classes:
 			f.write(row[1] + "\t" + allsecs)
@@ -83,6 +85,7 @@ def doExportSusan(output2, d):
 
 
 def doExportLinda(output2, d):
+	def 'doExportLinda'
 	import sqlite3
 	import globalvars
 	
@@ -101,7 +104,7 @@ def doExportLinda(output2, d):
 		for s in secs:
 			allsecs = allsecs + s[1] + " (" + s[0] + ")" + "\t"
 	
-	filename = output2 + "/classeslist.tsv"
+	filename = output2 + "/Lindaclasseslist.tsv"
 	with open(filename, 'wb') as f:
 		for row in classes:
 			f.write(row[1] + "\t" + allsecs)
@@ -114,13 +117,14 @@ def doExportLinda(output2, d):
 
 
 def doExportAll(output2, d):
+	def 'doExportAll'
 	import sqlite3
 	import globalvars
 	
 	conn = sqlite3.connect(globalvars.database_path)
 	cur = conn.cursor()
 	cur.execute('''SELECT A.Name, A.Email, A.Scheduled, A.Year, A.Division,
-		A.Skill, B.Name, C.ShortName, C.Name, C.Worth, D.Name, E.Day, E.Time
+		A.Skill, B.Name, C.ShortName, C.Name, C.Worth, D.Name, E.Day, E.Time,
 		A.Skill, B.Name, C.ShortName, C.Name, C.Worth, D.Name, E.Day, E.Time,
 		B.Room, B.NumberOpen, B.Seats 
 		FROM Students A INNER JOIN Sections B 

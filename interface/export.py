@@ -85,7 +85,7 @@ def doExportSusan(output2, d):
 
 
 def doExportLinda(output2, d):
-	def 'doExportLinda'
+	print 'doExportLinda'
 	import sqlite3
 	import globalvars
 	
@@ -117,14 +117,13 @@ def doExportLinda(output2, d):
 
 
 def doExportAll(output2, d):
-	def 'doExportAll'
+	print 'doExportAll'
 	import sqlite3
 	import globalvars
 	
 	conn = sqlite3.connect(globalvars.database_path)
 	cur = conn.cursor()
 	cur.execute('''SELECT A.Name, A.Email, A.Scheduled, A.Year, A.Division,
-		A.Skill, B.Name, C.ShortName, C.Name, C.Worth, D.Name, E.Day, E.Time,
 		A.Skill, B.Name, C.ShortName, C.Name, C.Worth, D.Name, E.Day, E.Time,
 		B.Room, B.NumberOpen, B.Seats 
 		FROM Students A INNER JOIN Sections B 

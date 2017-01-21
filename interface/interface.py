@@ -708,6 +708,7 @@ def openaddselect(): #Schedule
 		
 		
 		sqlite3.connect(globalvars.database_path)
+		conn = sqlite3.connect(globalvars.database_path)
 		cur = conn.cursor()
 		stu = cur.execute('SELECT StudentID FROM Students WHERE Name = ?',(current[0],))
 		stu = cur.fetchone()[0]
@@ -1232,6 +1233,25 @@ def openremoveblockselect(): #Remove Block
 			secID = section_index[sec[0]]
 			mat_yes[stuID,secID] = 0
 			mat_no[stuID,secID] = 0
+		
+		# byStudent remove block from any section of class
+		if current_section == 'any':
+			global mat_add
+			global section_index
+			cur.execute('SELECT ClassID FROM Classes WHERE ShortName = ?', (current_class,))
+			cla = cur.fetchone()[0]
+			
+			# get sections of class
+			cur.execute('SELECT SectionID FROM Sections WHERE ClassID = ?', (cla, ))
+			secs = cur.fetchall()
+			global mat_add
+			global section_index
+			for sec in secs:
+				secID = section_index[sec[0]]
+				mat_yes[stuID, secID] = 0
+				mat_no[stuID, secID] = 0
+				mat_add[stuID,secID] = 0
+			addPrefForClass(stu)
 			
 	
 	message = "Student Block Removed!"

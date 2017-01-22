@@ -706,13 +706,13 @@ def openaddselect(): #Schedule
 		
 		
 		
-		
 		sqlite3.connect(globalvars.database_path)
 		conn = sqlite3.connect(globalvars.database_path)
 		cur = conn.cursor()
-		stu = cur.execute('SELECT StudentID FROM Students WHERE Name = ?',(current[0],))
+		stu = cur.execute('SELECT StudentID FROM Students WHERE Name = ?',(current,))
 		stu = cur.fetchone()[0]
-		
+		global student_index
+		stuID = student_index[stu]
 		
 		
 		# byClass add student to specific section of class
@@ -725,7 +725,7 @@ def openaddselect(): #Schedule
 			
 			global mat_yes
 			global mat_no
-			stuID = student_index[stu]
+			global section_index
 			secID = section_index[sec] # what's sec from
 			mat_yes[stuID, secID] = 1
 			mat_no[stuID, secID] = 0
@@ -746,7 +746,7 @@ def openaddselect(): #Schedule
 			global mat_add
 			global mat_no
 			cur.execute('SELECT A.SectionID FROM Sections A INNER JOIN Classes B ON A.ClassID = B.ClassID WHERE B.ShortName = ?',(current_class,))
-			secs = fetchall()
+			secs = cur.fetchall()
 			global section_index
 			for sec in secs:
 				secID = section_index[sec[0]]
@@ -754,8 +754,8 @@ def openaddselect(): #Schedule
 				mat_add[stuID,secID] = 1
 				mat_no[stuID,secID] = 0
 				
-			
-			value = get_class_value(secs[0])
+			print secs[0][0]
+			value = get_class_value(secs[0][0])
 			oldvalue = cur.execute('SELECT Scheduled FROM Students WHERE StudentID = ?',(stu, ) )
 			oldvalue = cur.fetchone()[0]
 			c = cur.execute('UPDATE Students SET Scheduled = ? WHERE StudentID = ?',(float(oldvalue) + float(value),  stu) )
@@ -891,6 +891,9 @@ def openremoveselect(): #Remove
 		cur = conn.cursor()
 		stu = cur.execute('SELECT StudentID FROM Students WHERE Name = ?',(current[0],))
 		stu = cur.fetchone()[0]
+		global student_index
+		stuID = student_index[stu]
+		
 		
 		# byClass remove student from single section
 		if current_section != "any":
@@ -903,9 +906,7 @@ def openremoveselect(): #Remove
 			
 			# mats
 			global mat_yes
-			global student_index
 			global section_index
-			stuID = student_index[stu]
 			secID = section_index[sec]
 			mat_yes[stuID, secID] = 0
 			

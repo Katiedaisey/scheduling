@@ -384,27 +384,28 @@ def gen_sec_stu_matrix(pop, keep, mats, output):
 					
 					# get line containing classes student is scheduled for
 					# replace student schedule with line with additional classes
-					print mat_sch[cl[0],:]
+					print 'single section', mat_sch[cl[0],:]
 					mat_base[count2,:] = mat_sch[cl[0],:]
 					base_stu.remove(count2)
 					
 					
 				# any section, via mat_add, pref for class
 				if len(cl) == 0:
+					
 					cl = [i for i, x in enumerate(mat_add[count2,:]) if x==1]
-					print cl
 					cl = random.choice(cl)
-					print cl, mat_sch[cl,:]
 					mat_base[count2,:] = mat_sch[cl,:]
+					print 'any', count2, cl, mat_sch[cl,:]
+					base_stu.remove(count2)
+					
 					# get line containing classes student is scheduled for
 				
 				# remove classes scheduled
 				cl = [i for i, x in enumerate(mat_base[count2,:]) if x==1]
-				print cl
 				for c in cl:
-					print c
 					base_sec.remove(c)
 			count2 = count2 + 1
+		print mat_base[0,:]
 		
 		for p in range(pop):
 			# get copy of matrix with already scheduled tas
@@ -499,13 +500,12 @@ def updateDatabase(schedule, output):
 	cur = conn.cursor()
 	
 	#mat_pref = globalvars.mat_prefs[:,:]
-	
+	print schedule[0,:]
 	# reset student scheduled
 	cur.execute('UPDATE Students SET Scheduled = ?', (0,))
 	for sch in range(schedule.shape[1]):
 		stu = [i for i, x in enumerate(schedule[:,sch]) if x==1]
 		if len(stu) > 0:
-			print sch
 			secworth = get_section_worth(sch)[0]
 			cur.execute('UPDATE Sections SET Scheduled = ? WHERE SectionID = ?', (1, sch + 1))
 			cur.execute('UPDATE Sections Set StudentID = ? WHERE SectionID = ?', (stu[0] + 1, sch + 1))

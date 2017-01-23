@@ -38,26 +38,25 @@ def matrix_sections():
 			
 			if int(conflictsa) > 0 or int(conflictsb) > 0:
 				conflicts = max(int(conflictsa),int(conflictsb))
-			conflicts = conflicts * -10000000
+			conflicts = conflicts * globalvars.sec_time_con
 			
-			# 
+			# same class name
 			prefa = cur.execute('''SELECT COUNT(*) FROM Pref_Section_Section WHERE SectionID1 = ? AND SectionID2 = ?''', (a, b) )
 			prefa = cur.fetchall()[0][0]
 			prefb = cur.execute('''SELECT COUNT(*) FROM Pref_Section_Section WHERE SectionID1 = ? AND SectionID2 = ?''', (b,a) )
 			prefb = cur.fetchall()[0][0]
 			if prefa > 0 or prefb > 0:
 				pref = max(prefa, prefb)
-			pref = pref * 2000
+			pref = pref * globalvars.sec_sameclass_pref
 			
+			# same professor
 			pref2a = cur.execute('''SELECT COUNT(*) FROM Pref2_Section_Section WHERE SectionID1 = ? AND SectionID2 = ?''', (a, b) )
 			pref2a = cur.fetchall()[0][0]
-			pref2a = pref2a * 1000
 			pref2b = cur.execute('''SELECT COUNT(*) FROM Pref2_Section_Section WHERE SectionID1 = ? AND SectionID2 = ?''', (b,a) )
 			pref2b = cur.fetchall()[0][0]
-			pref2b = pref2b * 1000
 			if pref2a > 0 or pref2b > 0:
 				pref2 = max(pref2a, pref2b)
-			pref2 = pref2 * 2000
+			pref2 = pref2 * globalvars.sec_sameprof_pref
 					
 			mat_sections[i,j] = conflicts + pref + pref2
 	
@@ -109,8 +108,8 @@ def matrix_pref(d):
 							WHERE A.StudentID = ? AND C.SectionID = ?''', (students[i][0], sections[j][0]))
 			conflict1 = cur.fetchone()[0]
 			if int(conflict1) > 0:
-				conflict1 = -5000
-			conflict1 = conflict1 * 1
+				conflict1 = 1
+			conflict1 = conflict1 * globalvars.stu_time_con
 				
 			
 			# student section time conflicts (overlaps survey)
@@ -129,8 +128,8 @@ def matrix_pref(d):
 							WHERE A.StudentID = ? and C.SectionID = ?''', (students[i][0],sections[j][0]))
 			conflict2b = cur.fetchone()[0]
 			if conflict2a > 0 or conflict2b > 0:
-				conflict2 = -5000
-			conflict2 = conflict2 * 1
+				conflict2 = 1
+			conflict2 = conflict2 * globalvars.stu_time_con
 			
 			# Student class conflict desire
 			conflict3 = cur.execute('''SELECT COUNT(*)
@@ -139,8 +138,8 @@ def matrix_pref(d):
 							WHERE A.StudentID = ? and B.SectionID = ?''', (students[i][0],sections[j][0]))
 			conflict3 = cur.fetchone()[0]
 			if int(conflict3) > 0:
-				conflict3 = -500
-			conflict3 = conflict3 * 1
+				conflict3 = 1
+			conflict3 = conflict3 * globalvars.stu_class_con
 			
 			# student professor conflict desire
 			cur.execute('''SELECT COUNT(*)
@@ -149,8 +148,8 @@ def matrix_pref(d):
 							WHERE A.StudentID = ? and B.SectionID = ?''', (students[i][0],sections[j][0]))
 			conflict4 = cur.fetchone()[0]
 			if int(conflict4) > 0:
-				conflict4 = -500
-			conflict4 = conflict4 * 1
+				conflict4 = 1
+			conflict4 = conflict4 * globalvars.stu_prof_con
 			
 			# student section YDS prefs
 			cur.execute('''SELECT Count(*)
@@ -161,7 +160,7 @@ def matrix_pref(d):
 							WHERE A.StudentID = ? AND C.SectionID = ?
 							''',(students[i][0],sections[j][0]))
 			prefyr = cur.fetchone()[0]
-			prefyr = prefyr * 1000
+			prefyr = prefyr * globalvars.stu_year_prof
 			
 			
 			cur.execute('''SELECT Count(*)
@@ -172,7 +171,7 @@ def matrix_pref(d):
 							WHERE A.StudentID = ? AND C.SectionID = ?
 							''',(students[i][0],sections[j][0]))
 			prefdiv = cur.fetchone()[0]
-			prefdiv = prefdiv * 5000
+			prefdiv = prefdiv * globalvars.stu_div_pref
 			
 			
 			cur.execute('''SELECT Count(*)
@@ -183,7 +182,7 @@ def matrix_pref(d):
 							WHERE A.StudentID = ? AND C.SectionID = ?
 							''',(students[i][0],sections[j][0]))
 			prefsk = cur.fetchone()[0]
-			prefsk = prefsk * 1000
+			prefsk = prefsk globalvars.stu_skill.pref
 			
 			
 			# student section time prefs (equal to survey)
@@ -195,8 +194,8 @@ def matrix_pref(d):
 							WHERE A.StudentID = ? AND C.SectionID = ?''', (students[i][0], sections[j][0]))
 			pref1 = cur.fetchone()[0]
 			if int(pref1) > 0:
-				pref1 = 500
-			pref1 = pref1 * 1
+				pref1 = 1
+			pref1 = pref1 * globalvars.stu_time_pref
 			
 			# student section time prefs (overlaps survey)
 			cur.execute('''SELECT COUNT(*)
@@ -214,8 +213,8 @@ def matrix_pref(d):
 							WHERE A.StudentID = ? and C.SectionID = ?''', (students[i][0],sections[j][0]))
 			pref2b = cur.fetchone()[0]
 			if int(pref2a) > 0 or pref2b > 0:
-				pref2 = max(pref2a, pref2b)
-			pref2 = pref2 * 500
+				pref2 = 1
+			pref2 = pref2 * stu_time_pref
 			
 			
 			
@@ -227,18 +226,19 @@ def matrix_pref(d):
 							WHERE A.StudentID = ? and B.SectionID = ?''', (students[i][0],sections[j][0]))
 			pref3 = cur.fetchone()[0]
 			if int(pref3) > 0:
-				pref3 = 500
-			pref3 = pref3 * 1
+				pref3 = 1
+			pref3 = pref3 * globalvars.stu_class_pref
 			
 			
+			# student professor pref
 			pref4 = cur.execute('''SELECT COUNT(*)
 							FROM Pref_Student_Prof A INNER JOIN Sections B
 							On A.ProfessorID = B.ProfessorID
 							WHERE A.StudentID = ? and B.SectionID = ?''', (students[i][0],sections[j][0]))
 			pref4 = cur.fetchone()[0]
 			if int(pref4) > 0:
-				pref4 = 500
-			pref4 = pref4 * 1
+				pref4 = 1
+			pref4 = pref4 * globalvars.stu_prof_pref
 			
 			#print students[i][0], sections[j][0]
 			#print conflict1, conflict2, conflict3, conflict4, pref1, pref2, pref3, pref4, prefyr, prefdiv, prefsk

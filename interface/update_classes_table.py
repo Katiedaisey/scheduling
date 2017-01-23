@@ -31,7 +31,7 @@ def update_classes_table(filename):
 		DivisionID	INTEGER DEFAULT 0,
 		SkillID	INTEGER DEFAULT 0,
 		ShortName	TEXT UNIQUE,
-		Worth	REAL DEFAULT .5
+		Worth	REAL
 	);
 	
 	CREATE TABLE Professors (
@@ -48,7 +48,8 @@ def update_classes_table(filename):
 		Seats	INTEGER,
 		Room	TEXT,
 		StudentID INTEGER DEFAULT 0,
-		Scheduled INTEGER DEFAULT 0
+		Scheduled INTEGER DEFAULT 0,
+		Worth	REAL
 	);
 	
 	CREATE TABLE Times (
@@ -168,6 +169,7 @@ def update_classes_table(filename):
 			classname = entry[1]
 			classother = entry[0]
 			shortname = classother[0:7]
+			worth = entry[2]
 			
 			cur.execute('''INSERT OR IGNORE INTO Classes (Name, ShortName) 
 			VALUES ( ?, ? )''', ( classname, shortname ) )
@@ -181,7 +183,7 @@ def update_classes_table(filename):
 				SectionID = cur.fetchone()[0]
 			except:
 				cur.execute('''INSERT OR IGNORE INTO Sections 
-			(Name, ProfessorID, ClassID) VALUES (?, ?, ?)''', (sectionnum, ProfessorID, ClassID) )
+			(Name, ProfessorID, ClassID, Worth) VALUES (?, ?, ?, ?)''', (sectionnum, ProfessorID, ClassID, worth) )
 				cur.execute('SELECT SectionID FROM Sections WHERE Name = ? and ClassID = ?', (sectionnum, ClassID))
 				SectionID = cur.fetchone()[0]
 			
@@ -317,6 +319,9 @@ def update_classes_table(filename):
 				SET Room = ?, NumberOpen = ?, Seats = ?
 				WHERE SectionID = ?
 				''', (room, nostu, seats, SectionID))
+			
+			
+			
 			
 			# commit to database
 			conn.commit()

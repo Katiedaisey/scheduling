@@ -18,13 +18,11 @@ def get_section_worth(sec):
 	import globalvars
 	conn = sqlite3.connect(globalvars.database_path)
 	cur = conn.cursor()
-	sections = cur.execute('SELECT DISTINCT SectionID FROM Sections')
-	sections = cur.fetchall()
-	sec_worth = cur.execute('SELECT A.Worth FROM Classes A INNER JOIN Sections B ON A.ClassID = B.ClassID')
+	cur.execute('SELECT Worth FROM Sections')
 	sec_worth = cur.fetchall()
 	worth = sec_worth[sec]
 	return(worth)
-
+	
 
 # currently only does positive requirements
 # currently by number of classes (ie > 1)
@@ -77,7 +75,7 @@ def gen_sec_matrix(pop, keep, output):
 	sections = cur.fetchall()
 	stu_worth = cur.execute('SELECT Scheduled FROM Students')
 	stu_worth = cur.fetchall()
-	sec_worth = cur.execute('SELECT A.Worth FROM Classes A INNER JOIN Sections B ON A.ClassID = B.ClassID')
+	sec_worth = cur.execute('SELECT Worth FROM Sections')
 	sec_worth = cur.fetchall()
 	
 	mat_base = np.zeros((len(sections), len(sections)))
@@ -129,6 +127,8 @@ def gen_sec_matrix(pop, keep, output):
 		for r in require2:
 			worth = 0
 			for c in r:
+				print worth
+				print c, sec_worth[c]
 				worth = worth + sec_worth[c][0]
 			
 			# check if line is full
@@ -505,6 +505,7 @@ def updateDatabase(schedule, output):
 	for sch in range(schedule.shape[1]):
 		stu = [i for i, x in enumerate(schedule[:,sch]) if x==1]
 		if len(stu) > 0:
+			print sch
 			secworth = get_section_worth(sch)[0]
 			cur.execute('UPDATE Sections SET Scheduled = ? WHERE SectionID = ?', (1, sch + 1))
 			cur.execute('UPDATE Sections Set StudentID = ? WHERE SectionID = ?', (stu[0] + 1, sch + 1))

@@ -660,6 +660,7 @@ def centerselect(): #View
 	if scheduling == 'student':
 		print 'centerselect-student'
 		current = openListbox.get(ANCHOR)[0]
+		print current
 		global current_class
 		current_class = current
 		openListbox.delete(0, END)
@@ -691,7 +692,7 @@ def get_class_value(SectionID):
 	globalvars.database_path
 	conn = sqlite3.connect(globalvars.database_path)
 	cur = conn.cursor()
-	cla = cur.execute('''SELECT A.Worth from Classes A Inner Join Sections B ON A.ClassID = B.ClassID WHERE B.SectionID = ?''', (SectionID,))
+	cla = cur.execute('''SELECT Worth FROM Sections WHERE SectionID = ?''', (SectionID,))
 	cla = cur.fetchone()[0]
 	return(cla)
 
@@ -903,7 +904,7 @@ def openremoveselect(): #Remove
 				''', (current_class,current_section))
 			sec = cur.fetchone()[0]
 			
-			
+			print sec, stu
 			# mats
 			global mat_yes
 			global section_index
@@ -914,6 +915,7 @@ def openremoveselect(): #Remove
 			value = get_class_value(sec)
 			oldvalue = cur.execute('SELECT Scheduled FROM Students WHERE StudentID = ?',(stu, ) )
 			oldvalue = cur.fetchone()[0]
+			print value, oldvalue
 			cur.execute('''UPDATE Students SET Scheduled = ? 
 				WHERE StudentID = ?''',(oldvalue - value, stu) )
 			cur.execute('''Update Sections SET Scheduled = ? 
